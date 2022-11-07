@@ -29,7 +29,7 @@
         }
     },
     "variables": {
-      "customizescriptpath": "https://raw.githubusercontent.com/shawngib/project-stig/main/scripts/redhat8stig.sh",
+      "customizescriptpath": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/redhat8stig.sh",
       "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
     },
     "resources": [

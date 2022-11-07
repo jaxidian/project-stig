@@ -28,8 +28,8 @@
       }
     },
     "variables": {
-      "setPowerStigUrl": "https://raw.githubusercontent.com/shawngib/project-stig/main/scripts/setPowerStig.ps1",
-      "setAuditingStigUrl": "https://raw.githubusercontent.com/shawngib/project-stig/main/scripts/auditStig.ps1",
+      "setPowerStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/setPowerStig.ps1",
+      "setAuditingStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/auditStig.ps1",
       "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
     },
     "resources": [
