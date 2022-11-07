@@ -83,15 +83,17 @@ To deploy the correct resources that enable a base of STIG'd images be created i
 
 1. Ensure you have the required resource registrations in your subscription:
 
-```
+``` PowerShell
 Register-AzProviderFeature -FeatureName VirtualMachineTemplatePreview -ProviderNamespace Microsoft.VirtualMachineImages
 Register-AzResourceProvider Microsoft.KeyVault
 Register-AzResourceProvider Microsoft.VirtualMachineImages
 Register-AzResourceProvider Microsoft.Compute
 Register-AzResourceProvider Microsoft.Storage
 ```
+
 2. Deploy the solution to create the images:
-```    
+
+``` PowerShell
     $url = "https://raw.githubusercontent.com/shawngib/project-stig/main/azuredeploy.json"
     $imageResourceGroup = "<add the resource group name to create>" 
     $deploymentName = "<Add a name of deployment>" + (Get-Random)
@@ -103,6 +105,7 @@ Register-AzResourceProvider Microsoft.Storage
       -rgLocation eastus `
       -DeploymentDebugLogLevel All
 ```
+
 3. Create the images:
 
 At this point you should have the needed resources to create STIG'd images. Run the following for each image template created that you wish an image to be created in the shared image gallery. These are a result of the image template json files in the imageTemplate folder. These files also reflect how and where to create images and/or VHDs.  This automation includes these 5 images with the following names:
@@ -112,7 +115,7 @@ At this point you should have the needed resources to create STIG'd images. Run 
 - Windows Server 2016 v1r12 - 'Win2016_STIG'
 - Windows Server 2016 Domain Controller v1r12 - 'Win2016DC_STIG'
 
-```
+``` PowerShell
     Invoke-AzResourceAction `
       -ResourceName '<name of image from above>' ` # Example: Win2019_STIG
       -ResourceGroupName '<name of resource group where templates are>' `
@@ -123,7 +126,7 @@ At this point you should have the needed resources to create STIG'd images. Run 
 ```  
 UPDATE: The above invoke command will continue to work but new PowerShell commands will expedite this. For example, the following script will get all image templates in the resource group and run Start-AzImageBuilderTemplate as a job for each.  
 
-```
+``` PowerShell
 $imageTemplates = Get-AzImageBuilderTemplate -ResourceGroupName '<Resource Group Name>'
 foreach($template in $imageTemplates){
     Start-AzImageBuilderTemplate -ResourceGroupName '<Resource Group Name>' -Name $template.Name -AsJob
@@ -151,9 +154,9 @@ Specifically, when new STIG's are released or updated, you'll need do three thin
 - First create a MOF file which will be used by desired state configuration (DSC), one used for WS 2019 can be found <a href="https://github.com/shawngib/project-stig/blob/main/scripts/MOFcreation/WindowsServer2019v1r5.ps1">here</a>. It is a <a href="https://github.com/microsoft/PowerStig">PowerStig</a> DSC configuration script. Note: Pay close attention to naming convention of the configuration file since it will be the name of the output MOF file.
 - create a new <a href="https://docs.microsoft.com/en-us/azure/virtual-machines/linux/image-builder-json?toc=/azure/virtual-machines/windows/toc.json&bc=/azure/virtual-machines/windows/breadcrumb/toc.json">image definition template</a>. An example can be found <a href="https://github.com/shawngib/project-stig/blob/main/imageTemplates/windows2019.json">here</a>. Note: the example template is designed to operate as a nested template for the solution but can be adapted to run separately with some modifications.
 
-
 Sample PowerShell to upload the new image definition:
-```
+
+``` PowerShell
 # Image gallery name
 $sigGalleryName= "myIBSIG"
 
@@ -181,7 +184,89 @@ New-AzGalleryImageDefinition `
    -Offer 'WindowsServer' `
    -Sku 'WinSrv2019'
 ```
+
 *Note: Naming is important since image templates are not idempotent. Also versioning is important, for example our deployment uses the STIG version to properly audit with PowerSTIG and to place the newly created images in the image gallery.*
+
+### Updated Scripts from Shane
+
+First, you need to make sure you have the PowerShell Az module installed. Unfortunately, this can be a little painful. The docs for this can be [found here](https://learn.microsoft.com/en-us/powershell/azure/install-az-ps?view=azps-9.1.0).
+
+``` PowerShell
+# Check your PowerShell version:
+$PSVersionTable.PSVersion
+
+# For PowerShell 5.1 (installed in Windows by default), run this to update PowerShellGet:
+Install-Module -Name PowerShellGet -Force
+
+# After running the above for PowerShell 5.1 or for PowerShell 7.0.6 or newer, now run:
+Install-Module -Name Az -Scope CurrentUser -Repository PSGallery -Force
+
+# If you're having trouble, you may need to use a sledge hammer approach:
+Install-Module -Name Az -AllowClobber -Scope AllUsers -Force
+
+# If you get warnings about Az and AzureRM being simultaneously installed, you may need to uninstall AzureRM (as an Administrator):
+Uninstall-AzureRm
+```
+
+Now you need to setup your account connection for auth purposes. This step will be different for automation in ADO, but for a developer, run the following and be sure to log into the correct account (the URL that opens can be copy/pasted if you need to change browsers or browser profiles):
+
+``` PowerShell
+Connect-AzAccount
+
+# Some additional useful commands:
+Get-AzTenant
+Get-AzSubscription
+Get-AzEnvironment
+Set-AzEnvironment
+Set-AzContext -Subscription "xxxx-xxxx-xxxx-xxxx"
+```
+
+Executing the process (run manually, not all at once as a single script, and wait the appropriate amount of time in case something needs time to complete)
+
+``` PowerShell
+$uniqueNameForThisRun = "UNIQUENAMEGOESHERE"
+
+Register-AzProviderFeature -FeatureName VirtualMachineTemplatePreview -ProviderNamespace Microsoft.VirtualMachineImages
+Register-AzResourceProvider -ProviderNamespace Microsoft.KeyVault
+Register-AzResourceProvider -ProviderNamespace Microsoft.VirtualMachineImages
+Register-AzResourceProvider -ProviderNamespace Microsoft.Compute
+Register-AzResourceProvider -ProviderNamespace Microsoft.Storage
+
+# Need to change this URL line and bundle up the dependencies behind it so this can become something we can deliver!
+$url = "https://raw.githubusercontent.com/shawngib/project-stig/main/azuredeploy.json"
+$file = ".\\azuredeploy.json"
+$imageResourceGroup = "rg-" + $uniqueNameForThisRun
+$deploymentName = $uniqueNameForThisRun + "TestDeployment" + (Get-Random)
+
+# ONLINE TEMPLATE COMMAND:
+New-AzSubscriptionDeployment `
+   -Name $deploymentName `
+   -Location eastus `
+   -TemplateUri $url `
+   -rgName $imageResourceGroup `
+   -rgLocation eastus
+
+# LOCAL FILE TEMPLATE COMMAND:
+New-AzSubscriptionDeployment `
+   -Name $deploymentName `
+   -Location eastus `
+   -TemplateFile $file `
+   -rgName $imageResourceGroup `
+   -rgLocation eastus
+
+
+# wait a couple minutes
+
+Install-Module Az.ImageBuilder
+
+$imageTemplates = Get-AzImageBuilderTemplate -ResourceGroupName $imageResourceGroup
+foreach($template in $imageTemplates){ `
+    Start-AzImageBuilderTemplate -ResourceGroupName $imageResourceGroup -Name $template.Name -AsJob `
+}
+
+
+# wait ~60-90 minutes while images are prepared
+```
 
 ### Current Roadmap
 
