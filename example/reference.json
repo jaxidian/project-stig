@@ -157,7 +157,7 @@
                 }
             }
         },
-/*         {
+        {
             "name": "windows10STIGtemplate",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
@@ -198,8 +198,8 @@
                     }
                 }
             }
-        }, */
-        {
+        },
+/*        {
             "name": "windows2019smallSTIGtemplate",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
@@ -243,7 +243,7 @@
                     }
                 }
             }
-        },
+        }, */
         {
             "name": "windows2019STIGtemplate",
             "type": "Microsoft.Resources/deployments",
@@ -423,7 +423,7 @@
                     }
                 }
             }
-        },
+        } */,
         {
             "name": "redhatlinux8STIGtemplate",
             "type": "Microsoft.Resources/deployments",
@@ -462,7 +462,7 @@
                     }
                 }
             }
-        },
+        } /*,
         {
             "name": "redhatlinux7STIGtemplate",
             "type": "Microsoft.Resources/deployments",
