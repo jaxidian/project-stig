@@ -89,7 +89,7 @@
                     "type": "PlatformImage",
                     "publisher": "RedHat",
                     "offer": "RHEL",
-                    "sku": "8-LVM",
+                    "sku": "8-lvm-gen2",
                     "version": "8.0.20210422" // added support for currently supported RHEL versions
                 }, 
                 "customize": [
