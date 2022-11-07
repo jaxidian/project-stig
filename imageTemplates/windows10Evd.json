@@ -118,6 +118,10 @@
                 "eastus2",
                 "southcentralus"
               ]
+            },
+            {
+              "type": "VHD",
+              "runOutputName": "Win1020h1o365pp_STIG_V2R4"
             }
           ]
         }
