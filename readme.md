@@ -219,6 +219,16 @@ Get-AzSubscription
 Get-AzEnvironment
 Set-AzEnvironment
 Set-AzContext -Subscription "xxxx-xxxx-xxxx-xxxx"
+
+# For determing Publishers, Offers, SKUs, and Versions:
+$locName="eastus"
+Get-AzVMImagePublisher -Location $locName | Select PublisherName
+$pubName="<publisher>"
+Get-AzVMImageOffer -Location $locName -PublisherName $pubName | Select Offer
+$offerName="<offer>"
+Get-AzVMImageSku -Location $locName -PublisherName $pubName -Offer $offerName | Select Skus
+$skuName="<SKU>"
+Get-AzVMImage -Location $locName -PublisherName $pubName -Offer $offerName -Sku $skuName | Select Version
 ```
 
 Executing the process (run manually, not all at once as a single script, and wait the appropriate amount of time in case something needs time to complete)
