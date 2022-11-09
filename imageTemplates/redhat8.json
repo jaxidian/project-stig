@@ -44,7 +44,7 @@
                 "identifier": {
                     "publisher": "RedHat",
                     "offer": "RHEL",
-                    "sku": "8-LVM"
+                    "sku": "redhat-8-stig"
                 },
                 "recommended": {
                     "vCPUs": {
