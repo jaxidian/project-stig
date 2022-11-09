@@ -237,6 +237,7 @@ Executing the process (run manually, not all at once as a single script, and wai
 $uniqueNameForThisRun = "UNIQUENAMEGOESHERE"
 
 Register-AzProviderFeature -FeatureName VirtualMachineTemplatePreview -ProviderNamespace Microsoft.VirtualMachineImages
+Register-AzResourceProvider -ProviderNamespace Microsoft.Network
 Register-AzResourceProvider -ProviderNamespace Microsoft.KeyVault
 Register-AzResourceProvider -ProviderNamespace Microsoft.VirtualMachineImages
 Register-AzResourceProvider -ProviderNamespace Microsoft.Compute
