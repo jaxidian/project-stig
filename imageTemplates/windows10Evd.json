@@ -115,8 +115,7 @@
               },
               "replicationRegions": [
                 "usgovvirginia",
-                "usgovarizona",
-                "southcentralus"
+                "usgovarizona"
               ]
             },
             {

@@ -116,13 +116,12 @@
                         },
                         "replicationRegions": [
                             "usgovvirginia",
-                            "usgovarizona",
-                            "southcentralus"
+                            "usgovarizona"
                         ]
                     },
                     {
                         "type": "VHD",
-                        "runOutputName": "Redhat8_STIG"
+                        "runOutputName": "RHEL8gen1_STIG_v2R1"
                     }
                 ]
             }

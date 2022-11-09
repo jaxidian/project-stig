@@ -449,7 +449,7 @@
                         "value": "[reference('workspaceDeploy').outputs.workspaceName.value]"
                     },
                      "imageTemplateName":  {
-                         "value" :"RHEL8_STIG"
+                         "value" :"Redhat8_STIG"
                      },
                      "powerStigVersion": {
                          "value": "[parameters('powerStigVersion')]"
