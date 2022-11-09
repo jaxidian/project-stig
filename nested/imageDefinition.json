@@ -16,7 +16,8 @@
                     "minRecommendedvCPUs": "2",
                     "maxRecommendedvCPUs": "8",
                     "minRecommendedMemory": "32",
-                    "maxRecommendedMemory": "48"
+                    "maxRecommendedMemory": "48",
+                    "hyperVGeneration": "V2"
                 },
                 {
                     "imageDefinitionName": "Win2019_STIG",
@@ -28,7 +29,8 @@
                     "minRecommendedvCPUs": "2",
                     "maxRecommendedvCPUs": "8",
                     "minRecommendedMemory": "32",
-                    "maxRecommendedMemory": "48"
+                    "maxRecommendedMemory": "48",
+                    "hyperVGeneration": "V2"
                 },
                 // {
                 //     "imageDefinitionName": "Win2019_STIG_Small",
@@ -77,16 +79,13 @@
                     "minRecommendedvCPUs": "2",
                     "maxRecommendedvCPUs": "8",
                     "minRecommendedMemory": "32",
-                    "maxRecommendedMemory": "48"
+                    "maxRecommendedMemory": "48",
+                    "hyperVGeneration": "V1"
                 }
             ]
         },
         "galleryName": {
             "type": "string"
-        },
-        "hyperVGeneration": {
-            "type": "string",
-            "defaultValue": "V2"
         }
     },
     "variables": {},
@@ -119,7 +118,7 @@
                         "max": "[parameters('definitions')[copyIndex()].maxRecommendedMemory]"
                     }
                 },
-                "hyperVGeneration": "V2"
+                "hyperVGeneration": "[parameters('definitions')[copyIndex()].hyperVGeneration]"
             },
             "tags": {}
         }

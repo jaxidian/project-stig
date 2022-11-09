@@ -121,7 +121,7 @@
                     },
                     {
                         "type": "VHD",
-                        "runOutputName": "RHEL8gen2_STIG_v2R1"
+                        "runOutputName": "RHEL8gen1_STIG_v2R1"
                     }
                 ]
             }
