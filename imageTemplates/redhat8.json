@@ -43,8 +43,8 @@
                 "osState": "Generalized",
                 "identifier": {
                     "publisher": "RedHat",
-                    "offer": "RedHat",
-                    "sku": "redhat-8-stig"
+                    "offer": "RHEL",
+                    "sku": "8-LVM"
                 },
                 "recommended": {
                     "vCPUs": {
@@ -89,7 +89,7 @@
                     "publisher": "RedHat",
                     "offer": "RHEL",
                     "sku": "8-LVM",
-                    "version": "8.0.20210422" // added support for currently supported RHEL versions
+                    "version": "8.6.2022102701" // added support for currently supported RHEL versions
                 },
                 "customize": [
                     {
