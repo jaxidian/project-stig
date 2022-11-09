@@ -122,8 +122,8 @@
                         "baseosimg": "linux"
                     },
                     "replicationRegions": [
-                        "eastus",
-                        "eastus2",
+                        "usgovvirginia",
+                        "usgovarizona",
                         "southcentralus"
                     ]
                     },

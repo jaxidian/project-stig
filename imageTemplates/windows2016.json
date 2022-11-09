@@ -118,8 +118,8 @@
                 "baseosimg": "WindowsServer"
               },
               "replicationRegions": [
-                "eastus",
-                "eastus2",
+                "usgovvirginia",
+                "usgovarizona",
                 "southcentralus"
               ]
             },

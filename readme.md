@@ -99,10 +99,10 @@ Register-AzResourceProvider Microsoft.Storage
     $deploymentName = "<Add a name of deployment>" + (Get-Random)
     New-AzSubscriptionDeployment `
       -Name $deploymentName `
-      -Location eastus `
+      -Location usgovvirginia `
       -TemplateUri $url `
       -rgName $imageResourceGroup `
-      -rgLocation eastus `
+      -rgLocation usgovvirginia `
       -DeploymentDebugLogLevel All
 ```
 
@@ -164,7 +164,7 @@ $sigGalleryName= "myIBSIG"
 $imageDefName ="winSvrimage"
 
 # additional replication region
-$replRegion2="eastus"
+$replRegion2="usgovvirginia"
 
 # Create the gallery
 New-AzGallery `
@@ -221,7 +221,7 @@ Set-AzEnvironment
 Set-AzContext -Subscription "xxxx-xxxx-xxxx-xxxx"
 
 # For determing Publishers, Offers, SKUs, and Versions:
-$locName="eastus"
+$locName="usgovvirginia"
 Get-AzVMImagePublisher -Location $locName | Select PublisherName
 $pubName="<publisher>"
 Get-AzVMImageOffer -Location $locName -PublisherName $pubName | Select Offer
@@ -251,18 +251,18 @@ $deploymentName = $uniqueNameForThisRun + "TestDeployment" + (Get-Random)
 # ONLINE TEMPLATE COMMAND:
 New-AzSubscriptionDeployment `
    -Name $deploymentName `
-   -Location eastus `
+   -Location usgovvirginia `
    -TemplateUri $url `
    -rgName $imageResourceGroup `
-   -rgLocation eastus
+   -rgLocation usgovvirginia
 
 # LOCAL FILE TEMPLATE COMMAND:
 New-AzSubscriptionDeployment `
    -Name $deploymentName `
-   -Location eastus `
+   -Location usgovvirginia `
    -TemplateFile $file `
    -rgName $imageResourceGroup `
-   -rgLocation eastus
+   -rgLocation usgovvirginia
 
 
 # wait a couple minutes

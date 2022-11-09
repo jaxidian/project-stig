@@ -114,8 +114,8 @@
                 "baseosimg": "windowsclient"
               },
               "replicationRegions": [
-                "eastus",
-                "eastus2",
+                "usgovvirginia",
+                "usgovarizona",
                 "southcentralus"
               ]
             },

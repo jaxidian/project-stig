@@ -106,7 +106,7 @@ Function Post-LogAnalyticsData($customerId, $sharedKey, $body, $logType)
 #$audit = Test-DscConfiguration -ComputerName localhost -ReferenceConfiguration "c:\localhost.mof"  -ErrorAction SilentlyContinue
 
 
-# Workspace ID - TestSubdeploy-eastusWS
+# Workspace ID - TestSubdeploy-usgovvirginiaWS
 $customerId = $env:WORKSPACE_ID
 
 # Primary Key

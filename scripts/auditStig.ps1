@@ -90,7 +90,7 @@ Function Post-LogAnalyticsData($customerId, $sharedKey, $body, $logType, $resour
 
 }
 
-# Workspace ID - TestSubdeploy-eastusWS
+# Workspace ID - TestSubdeploy-usgovvirginiaWS
 $customerId = $env:WORKSPACE_ID
 
 # Primary Key
