@@ -23,7 +23,7 @@
         {
             "name": "[variables('workspaceName')]",
             "type": "Microsoft.OperationalInsights/workspaces",
-            "apiVersion": "2015-11-01-preview",
+            "apiVersion": "2015-11-01-preview", /* "2022-10-01" is the latest */
             "location": "usgovvirginia",
             "properties": {
                 "sku": {
