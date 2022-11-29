@@ -25,7 +25,8 @@
     "functions": [],
     "variables": {
         "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
-        "srv2019MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/WindowsServer2019v2r4/localhost.mof')]"
+        "srv2019MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/WindowsServer2019v2r4/localhost.mof')]",
+        "rhel8ScriptUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/redhat8stig.sh')]"
     },
     "resources": [
         {
@@ -849,6 +850,9 @@
                         "identityId": {
                             "type": "string"
                         },
+                        "customizescriptpath": {
+                            "type": "string"
+                        },
                         "galleryName": {
                             "type": "string"
                         },
@@ -873,7 +877,6 @@
                         }
                     },
                     "variables": {
-                        "customizescriptpath": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/redhat8stig.sh",
                         "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     },
                     "resources": [
@@ -947,6 +950,11 @@
                                             "[concat('sudo echo ''export STIG_OSVER=', parameters('osVersion'),''' >> /etc/profile.d/imagebuilder.sh')]",
                                             "[concat('sudo echo ''export STIG_VER=', parameters('stigVersion'),''' >> /etc/profile.d/imagebuilder.sh')]"
                                         ]
+                                    },
+                                    {
+                                        "type": "Shell",
+                                        "name": "scriptRun",
+                                        "scriptUri": "[variables('customizescriptpath')]"
                                     }
                                 ],
                                 "distribute": [
@@ -975,6 +983,9 @@
                 "parameters": {
                     "identityId": {
                         "value": "[reference('managedIdentityDeploy').outputs.identityName.value]"
+                    },
+                    "customizescriptpath": {
+                        "value": "[variables('rhel8ScriptUrl')]"
                     },
                     "galleryName": {
                         "value": "[reference('imageGalleryDeploy').outputs.galleryName.value]"
