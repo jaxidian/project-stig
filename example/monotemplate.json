@@ -954,7 +954,7 @@
                                     {
                                         "type": "Shell",
                                         "name": "scriptRun",
-                                        "scriptUri": "[variables('customizescriptpath')]"
+                                        "scriptUri": "[parameters('customizescriptpath')]"
                                     }
                                 ],
                                 "distribute": [
