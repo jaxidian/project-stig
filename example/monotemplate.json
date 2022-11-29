@@ -24,14 +24,6 @@
     },
     "functions": [],
     "variables": {
-        "workspaceUrl": "[uri(deployment().properties.templateLink.uri, '../nested/workspace.json')]",
-        "workspaceDashboardUrl": "[uri(deployment().properties.templateLink.uri, '../nested/dashboard.json')]",
-        "managedIdentityUrl": "[uri(deployment().properties.templateLink.uri, '../nested/managedIdentity.json')]",
-        //"imageGalleryUrl": "[uri(deployment().properties.templateLink.uri, '../nested/imageGallery.json')]",
-        "win10mageTemplateUrl": "[uri(deployment().properties.templateLink.uri, '../imageTemplates/windows10Evd.json')]",
-        //"srv2019imageTemplateUrl": "[uri(deployment().properties.templateLink.uri, '../imageTemplates/windows2019.json')]",
-        "rhel8imageTemplateUrl": "[uri(deployment().properties.templateLink.uri, '../imageTemplates/redhat8.json')]",
-        "imageDefinitionUrl": "[uri(deployment().properties.templateLink.uri, '../nested/imageDefinition.json')]",
         "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
         "srv2019MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/WindowsServer2019v2r4/localhost.mof')]"
     },
@@ -56,9 +48,88 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('workspaceUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "functions": [],
+                    "variables": {
+                        "workspaceName": "[replace(concat(parameters('name'),'-WS-', resourceGroup().location),'_','')]",
+                        "automationAccountName": "[replace(concat(parameters('name'),'-AA'),'_','')]",
+                        "solutionArray": {
+                            "solutions": [
+                                {
+                                    "name": "[concat('SecurityInsights', '(', variables('workspaceName'), ')')]",
+                                    "galleryName": "SecurityInsights"
+                                }
+                            ]
+                        }
+                    },
+                    "resources": [
+                        {
+                            "name": "[variables('workspaceName')]",
+                            "type": "Microsoft.OperationalInsights/workspaces",
+                            "apiVersion": "2015-11-01-preview", /* "2022-10-01" is the latest */
+                            "location": "usgovvirginia",
+                            "properties": {
+                                "sku": {
+                                    "name": "PerGB2018"
+                                },
+                                "features": {
+                                    "searchVersion": 1
+                                }
+                            }
+                        },
+                        {
+                            "name": "[variables('automationAccountName')]",
+                            "type": "Microsoft.Automation/automationAccounts",
+                            "apiVersion": "2015-10-31",
+                            "location": "usgovarizona",
+                            "tags": {
+                            },
+                            "properties": {
+                                "sku": {
+                                    "name": "Free"
+                                }
+                            }
+                        },
+                        {
+                            "apiVersion": "2015-11-01-preview",
+                            "location": "[resourceGroup().location]",
+                            "name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
+                            "type": "Microsoft.OperationsManagement/solutions",
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('solutionArray').solutions[copyIndex()].Name)]",
+                            "dependsOn": [
+                                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
+                            ],
+                            "copy": {
+                                "name": "solutionCopy",
+                                "count": "[length(variables('solutionArray').solutions)]"
+                            },
+                            "properties": {
+                                "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
+                            },
+                            "plan": {
+                                "name": "[variables('solutionArray').solutions[copyIndex()].Name]",
+                                "publisher": "Microsoft",
+                                "promotionCode": "",
+                                "product": "[concat('OMSGallery/', variables('solutionArray').solutions[copyIndex()].galleryName)]"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "workspaceName": {
+                            "type": "string",
+                            "value": "[variables('workspaceName')]"
+                        }
+                    }
                 },
                 "parameters": {
                     "name": {
@@ -77,9 +148,61 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('workspaceDashboardUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "contentVersion": "1.0.0.0",
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "parameters": {
+                        "workbookDisplayName": {
+                            "type": "string",
+                            "defaultValue": "STIG Compliance",
+                            "metadata": {
+                                "description": "The friendly name for the workbook that is used in the Gallery or Saved List.  This name must be unique within a resource group."
+                            }
+                        },
+                        "workbookType": {
+                            "type": "string",
+                            "defaultValue": "sentinel",
+                            "metadata": {
+                                "description": "The gallery that the workbook will been shown under. Supported values include workbook, tsg, etc. Usually, this is 'workbook'"
+                            }
+                        },
+                        "workspaceName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "The id of resource instance to which the workbook will be associated"
+                            }
+                        },
+                        "workbookId": {
+                            "type": "string",
+                            "defaultValue": "[newGuid()]",
+                            "metadata": {
+                                "description": "The unique guid for this workbook instance"
+                            }
+                        }
+                    },
+                    "variables": {
+                        "workbookSourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('workbookId')]",
+                            "type": "microsoft.insights/workbooks",
+                            "location": "[resourceGroup().location]",
+                            "apiVersion": "2018-06-17-preview",
+                            "dependsOn": [],
+                            "kind": "shared",
+                            "properties": {
+                                "displayName": "[parameters('workbookDisplayName')]",
+                                "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"## Azure DISA STIG Workbook\\n---\\n\\nWelcome to the Azure DISA STIG Compliance workbook.  This workbook provides visualized compliance data generated by the Azure Image Builder STIG solution.\\n\\n\\n\"},\"name\":\"text - 2\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"STIG_Compliance_CL\\n| distinct FindingID_s, DesiredState_b\\n| summarize count() by tostring(DesiredState_b)\",\"size\":1,\"showAnalytics\":true,\"title\":\"Overall STIG Status\",\"timeContext\":{\"durationMs\":1800000},\"showExportToExcel\":true,\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\",\"chartSettings\":{\"seriesLabelSettings\":[{\"seriesName\":\"False\",\"label\":\"Not Applied\",\"color\":\"redBright\"},{\"seriesName\":\"True\",\"label\":\"Applied\",\"color\":\"green\"},{\"seriesName\":\"\",\"label\":\"Manual\"}]}},\"customWidth\":\"40\",\"showPin\":true,\"name\":\"Computers\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"STIG_Compliance_CL\\r\\n| where DesiredState_b == false\\r\\n| distinct FindingID_s, Computer\\r\\n| summarize count(FindingID_s) by Computer\\r\\n\",\"size\":1,\"showAnalytics\":true,\"title\":\"Open STIGs by Computer\",\"timeContext\":{\"durationMs\":1800000},\"showExportToExcel\":true,\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\"},\"customWidth\":\"30\",\"showPin\":true,\"name\":\"Open STIGs by Computer\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"STIG_Compliance_CL\\r\\n| where DesiredState_b == false\\r\\n| distinct FindingID_s, Severity_s, DesiredState_b\\r\\n| summarize count(FindingID_s) by Severity_s \\r\\n\",\"size\":1,\"showAnalytics\":true,\"title\":\"Open STIGs by Severity\",\"timeContext\":{\"durationMs\":1800000},\"showExportToExcel\":true,\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"visualization\":\"piechart\",\"chartSettings\":{\"seriesLabelSettings\":[{\"seriesName\":\"STIG_Compliance_CL\",\"label\":\"STIG Compliance\"},{\"seriesName\":\"\",\"label\":\"informational\"}]}},\"customWidth\":\"30\",\"showPin\":true,\"name\":\"Open STIGs by severity\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"STIG_Compliance_Computer_CL  | distinct Computer, DesiredState_b, Domain_s\",\"size\":1,\"showAnalytics\":true,\"title\":\"Overall Compliance State by Computer\",\"timeContext\":{\"durationMs\":1800000},\"showExportToExcel\":true,\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"customWidth\":\"33\",\"showPin\":true,\"name\":\"query - 4\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"STIG_Compliance_CL \\r\\n| distinct Computer, FindingID_s, Severity_s, DesiredState_b \\r\\n| extend Success = case(DesiredState_b == true, \\\"Applied\\\",\\r\\n                        DesiredState_b == false, \\\"Not-Applied\\\",\\r\\n                        \\\"Question\\\")\",\"size\":0,\"showAnalytics\":true,\"title\":\"STIG Status and Details by Computer\",\"timeContext\":{\"durationMs\":1800000},\"showExportToExcel\":true,\"queryType\":0,\"resourceType\":\"microsoft.operationalinsights/workspaces\",\"gridSettings\":{\"rowLimit\":10000,\"filter\":true,\"hierarchySettings\":{\"treeType\":1,\"groupBy\":[\"Computer\",\"Success\",\"Severity_s\"]}}},\"customWidth\":\"66\",\"showPin\":true,\"name\":\"STIG Status and Details by Computer\"}],\"isLocked\":false,\"fallbackResourceIds\":[\"/subscriptions/bf031e99-23ef-4cc3-b5a9-b2761eb6126d/resourceGroups/STIG_DEMO/providers/Microsoft.OperationalInsights/workspaces/STIGDEMO-WS-usgovvirginia\"],\"styleSettings\":{\"paddingStyle\":\"narrow\",\"spacingStyle\":\"narrow\"}}",
+                                "version": "1.0",
+                                "sourceId": "[variables('workbookSourceId')]",
+                                "category": "[parameters('workbookType')]"
+                            }
+                        }
+                    ]
                 },
                 "parameters": {
                     "workspaceName": {
@@ -98,9 +221,51 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('managedIdentityUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "name": {
+                            "type": "string",
+                            "defaultValue": "tempManagedIdentity"
+                        }
+                    },
+                    "functions": [],
+                    "variables": {
+                        "identityName": "[concat(parameters('name'), 'identity', uniqueString(resourceGroup().id))]",
+                        "bootstrapRoleAssignmentId": "[guid(concat(resourceGroup().id, 'contributor'))]"
+                    },
+                    "resources": [
+                        {
+                            "name": "[variables('identityName')]",
+                            "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+                            "apiVersion": "2018-11-30",
+                            "location": "[resourceGroup().location]"
+                        },
+                        {
+                            "type": "Microsoft.Authorization/roleAssignments",
+                            "apiVersion": "2018-09-01-preview",
+                            "name": "[variables('bootstrapRoleAssignmentId')]",
+                            "dependsOn": [
+                                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]"
+                            ],
+                            "properties": {
+                                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName')), '2018-11-30').principalId]",
+                                "scope": "[resourceGroup().id]",
+                                "principalType": "ServicePrincipal"
+                            }
+                        }
+                    ],
+                    "outputs": {
+                        "identityName": {
+                            "type": "string",
+                            "value": "[variables('identityName')]"
+                        }
+                    }
                 },
                 "parameters": {
                     "name": {
@@ -167,9 +332,133 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('imageDefinitionUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "definitions": {
+                            "type": "array",
+                            "defaultValue": [
+                                {
+                                    "imageDefinitionName": "Win10WVDw365_STIG",
+                                    "osType": "Windows",
+                                    "osState": "Generalized",
+                                    "publisher": "MicrosoftWindowsDesktop",
+                                    "offer": "office-365",
+                                    "sku": "win10-22h2-avd-m365-g2",
+                                    "minRecommendedvCPUs": "2",
+                                    "maxRecommendedvCPUs": "8",
+                                    "minRecommendedMemory": "32",
+                                    "maxRecommendedMemory": "48",
+                                    "hyperVGeneration": "V2"
+                                },
+                                {
+                                    "imageDefinitionName": "Win2019_STIG",
+                                    "osType": "Windows",
+                                    "osState": "Generalized",
+                                    "publisher": "MicrosoftWindowsServer",
+                                    "offer": "WindowsServer",
+                                    "sku": "2019-Datacenter-Stig",
+                                    "minRecommendedvCPUs": "2",
+                                    "maxRecommendedvCPUs": "8",
+                                    "minRecommendedMemory": "32",
+                                    "maxRecommendedMemory": "48",
+                                    "hyperVGeneration": "V2"
+                                },
+                                // {
+                                //     "imageDefinitionName": "Win2019_STIG_Small",
+                                //     "osType": "Windows",
+                                //     "osState": "Generalized",
+                                //     "publisher": "MicrosoftWindowsServer",
+                                //     "offer": "WindowsServer",
+                                //     "sku": "2019-Datacenter-Stig-Small",
+                                //     "minRecommendedvCPUs": "2",
+                                //     "maxRecommendedvCPUs": "8",
+                                //     "minRecommendedMemory": "32",
+                                //     "maxRecommendedMemory": "48"
+                                // }
+                                // },
+                                // {
+                                //     "imageDefinitionName": "Win2016_STIG",
+                                //     "osType": "Windows",
+                                //     "osState": "Generalized",
+                                //     "publisher": "MicrosoftWindowsServer",
+                                //     "offer": "WindowsServer",
+                                //     "sku": "2016-Datacenter-Stig",
+                                //     "minRecommendedvCPUs": "2",
+                                //     "maxRecommendedvCPUs": "8",
+                                //     "minRecommendedMemory": "32",
+                                //     "maxRecommendedMemory": "48"
+                                // },
+                                // {
+                                //     "imageDefinitionName": "Win2016DC_STIG",
+                                //     "osType": "Windows",
+                                //     "osState": "Generalized",
+                                //     "publisher": "MicrosoftWindowsServer",
+                                //     "offer": "WindowsServer",
+                                //     "sku": "2016-Datacenter-DC-Stig",
+                                //     "minRecommendedvCPUs": "2",
+                                //     "maxRecommendedvCPUs": "8",
+                                //     "minRecommendedMemory": "32",
+                                //     "maxRecommendedMemory": "48"
+                                // },
+                                {
+                                    "imageDefinitionName": "Redhat8_STIG",
+                                    "osType": "Linux",
+                                    "osState": "Generalized",
+                                    "publisher": "Redhat",
+                                    "offer": "RHEL",
+                                    "sku": "redhat-8-stig",
+                                    "minRecommendedvCPUs": "2",
+                                    "maxRecommendedvCPUs": "8",
+                                    "minRecommendedMemory": "32",
+                                    "maxRecommendedMemory": "48",
+                                    "hyperVGeneration": "V1"
+                                }
+                            ]
+                        },
+                        "galleryName": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {},
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/galleries/images",
+                            "name": "[concat(parameters('galleryName'), '/', parameters('definitions')[copyIndex()].imageDefinitionName)]",
+                            "apiVersion": "2019-07-01",
+                            "location": "[resourceGroup().location]",
+                            "copy": {
+                                "name": "Image Definition Copy",
+                                "count": "[length(parameters('definitions'))]"
+                            },
+                            "properties": {
+                                "osType": "[parameters('definitions')[copyIndex()].osType]",
+                                "osState": "[parameters('definitions')[copyIndex()].osState]",
+                                "identifier": {
+                                    "publisher": "[parameters('definitions')[copyIndex()].publisher]",
+                                    "offer": "[parameters('definitions')[copyIndex()].offer]",
+                                    "sku": "[parameters('definitions')[copyIndex()].sku]"
+                                },
+                                "recommended": {
+                                    "vCPUs": {
+                                        "min": "[parameters('definitions')[copyIndex()].minRecommendedvCPUs]",
+                                        "max": "[parameters('definitions')[copyIndex()].maxRecommendedvCPUs]"
+                                    },
+                                    "memory": {
+                                        "min": "[parameters('definitions')[copyIndex()].minRecommendedMemory]",
+                                        "max": "[parameters('definitions')[copyIndex()].maxRecommendedMemory]"
+                                    }
+                                },
+                                "hyperVGeneration": "[parameters('definitions')[copyIndex()].hyperVGeneration]"
+                            },
+                            "tags": {}
+                        }
+                    ],
+                    "outputs": {}
                 },
                 "parameters": {
                     "galleryName": {
@@ -188,9 +477,137 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('win10mageTemplateUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "mofUrl": {
+                            "type": "string"
+                        },
+                        "identityId": {
+                            "type": "string"
+                        },
+                        "galleryName": {
+                            "type": "string"
+                        },
+                        "workspaceName": {
+                            "type": "string"
+                        },
+                        "imageTemplateName": {
+                            "type": "string"
+                        },
+                        "powerStigVersion": {
+                            "type": "string"
+                        },
+                        "stigVersion": {
+                            "type": "string"
+                        },
+                        "osVersion": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "setPowerStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/setPowerStig.ps1",
+                        "setAuditingStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/auditStig.ps1",
+                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    },
+                    "resources": [
+                        {
+                            "name": "[parameters('imageTemplateName')]",
+                            "type": "Microsoft.VirtualMachineImages/imageTemplates",
+                            "apiVersion": "2020-02-14",
+                            "location": "[resourceGroup().location]",
+                            "dependsOn": [],
+                            "tags": {
+                                "imagebuilderTemplate": "AzureImageBuilderSIG",
+                                "userIdentity": "enabled"
+                            },
+                            "identity": {
+                                "type": "UserAssigned",
+                                "userAssignedIdentities": {
+                                    "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('identityId'))]": {
+
+                                    }
+                                }
+                            },
+                            "properties": {
+                                "buildTimeoutInMinutes": 100,
+                                "vmProfile": {
+                                    "vmSize": "Standard_D4_v5",
+                                    "osDiskSizeGB": 127
+                                },
+                                "source": {
+                                    "type": "PlatformImage",
+                                    "publisher": "MicrosoftWindowsDesktop",
+                                    "offer": "office-365",
+                                    "sku": "win10-22h2-avd-m365-g2",
+                                    "version": "latest"
+                                },
+                                "customize": [
+                                    {
+                                        "type": "PowerShell",
+                                        "name": "setEnvVariables",
+                                        "inline": [
+                                            "[concat('[System.Environment]::SetEnvironmentVariable(''WORKSPACE_ID'',''',reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')),'2017-03-15-preview').customerId,''',[System.EnvironmentVariableTarget]::Machine)')]",
+                                            "[concat('[System.Environment]::SetEnvironmentVariable(''WORKSPACE_KEY'',''',listKeys(variables('wsResourceId'), '2015-11-01-preview').primarySharedKey,''', [System.EnvironmentVariableTarget]::Machine)')]",
+                                            "[concat('[System.Environment]::SetEnvironmentVariable(''POWERSTIG_VER'',''',parameters('powerStigVersion'),''', [System.EnvironmentVariableTarget]::Machine)')]",
+                                            "[concat('[System.Environment]::SetEnvironmentVariable(''STIG_OSVER'',''',parameters('osVersion'),''', [System.EnvironmentVariableTarget]::Machine)')]",
+                                            "[concat('[System.Environment]::SetEnvironmentVariable(''STIG_VER'',''',parameters('stigVersion'),''', [System.EnvironmentVariableTarget]::Machine)')]"
+                                        ]
+                                    },
+                                    {
+                                        "type": "File",
+                                        "name": "mofFileDownload",
+                                        "sourceUri": "[parameters('mofUrl')]",
+                                        "destination": "c:\\localhost.mof"
+                                    },
+                                    {
+                                        "type": "File",
+                                        "name": "AuditScriptDownload",
+                                        "sourceUri": "[variables('setAuditingStigUrl')]",
+                                        "destination": "c:\\auditStig.ps1"
+                                    },
+                                    {
+                                        "type": "PowerShell",
+                                        "name": "SetUpPowerStig",
+                                        "runElevated": true,
+                                        "scriptUri": "[variables('setPowerStigUrl')]"
+                                    },
+                                    {
+                                        "type": "WindowsUpdate",
+                                        "searchCriteria": "IsInstalled=0",
+                                        "filters": [
+                                            "exclude:$_.Title -like '*Preview*'",
+                                            "include:$true"
+                                        ],
+                                        "updateLimit": 40
+                                    }
+                                ],
+                                "distribute": [
+                                    {
+                                        "type": "SharedImage",
+                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.0')]",
+                                        "runOutputName": "[parameters('imageTemplateName')]",
+                                        "artifactTags": {
+                                            "source": "azureVmImageBuilder",
+                                            "baseosimg": "windowsclient"
+                                        },
+                                        "replicationRegions": [
+                                            "usgovvirginia",
+                                            "usgovarizona"
+                                        ]
+                                    },
+                                    {
+                                        "type": "VHD",
+                                        "runOutputName": "Win10gen2_STIG_V2R1"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
                 },
                 "parameters": {
                     "identityId": {
@@ -422,9 +839,138 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('rhel8imageTemplateUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "identityId": {
+                            "type": "string"
+                        },
+                        "galleryName": {
+                            "type": "string"
+                        },
+                        "workspaceName": {
+                            "type": "string"
+                        },
+                        "imageTemplateName": {
+                            "type": "string"
+                        },
+                        "powerStigVersion": {
+                            "type": "string"
+                        },
+                        "stigVersion": {
+                            "type": "string"
+                        },
+                        "osVersion": {
+                            "type": "string"
+                        },
+                        "hyperVGeneration": {
+                            "type": "string",
+                            "defaultValue": "V1"
+                        }
+                    },
+                    "variables": {
+                        "customizescriptpath": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/redhat8stig.sh",
+                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/galleries/images",
+                            "name": "[concat(parameters('galleryName'), '/', parameters('imageTemplateName'))]",
+                            "apiVersion": "2019-07-01",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "osType": "Linux",
+                                "osState": "Generalized",
+                                "identifier": {
+                                    "publisher": "RedHat",
+                                    "offer": "RHEL",
+                                    "sku": "redhat-8-stig"
+                                },
+                                "recommended": {
+                                    "vCPUs": {
+                                        "min": "2",
+                                        "max": "8"
+                                    },
+                                    "memory": {
+                                        "min": "32",
+                                        "max": "48"
+                                    }
+                                },
+                                "hyperVGeneration": "[parameters('hyperVGeneration')]"
+                            },
+                            "tags": {}
+                        },
+                        {
+                            "name": "[concat(parameters('imageTemplateName'),'1')]",
+                            "type": "Microsoft.VirtualMachineImages/imageTemplates",
+                            "apiVersion": "2020-02-14",
+                            "location": "[resourceGroup().location]",
+                            "identity": {
+                                "type": "UserAssigned",
+                                "userAssignedIdentities": {
+                                    "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('identityId'))]": {}
+                                }
+                            },
+                            "dependsOn": [
+                                "[resourceID('Microsoft.Compute/galleries/images/',parameters('galleryName'),parameters('imageTemplateName'))]"
+                            ],
+                            "tags": {
+                                "imagebuilderTemplate": "AzureImageBuilderSIG",
+                                "userIdentity": "enabled"
+                            },
+                            "properties": {
+                                "buildTimeoutInMinutes": 100,
+                                "vmProfile": {
+                                    "vmSize": "Standard_D1_v2",
+                                    "osDiskSizeGB": 100
+                                },
+                                "source": {
+                                    "type": "PlatformImage",
+                                    "publisher": "RedHat",
+                                    "offer": "RHEL",
+                                    "sku": "8-LVM",
+                                    "version": "8.6.2022102701" // added support for currently supported RHEL versions
+                                },
+                                "customize": [
+                                    {
+                                        "type": "Shell",
+                                        "name": "Update",
+                                        "inline": [
+                                            "sudo touch /etc/profile.d/imagebuilder.sh",
+                                            "[concat('sudo echo ''export WORKSPACE_ID=',reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')),'2017-03-15-preview').customerId,''' >> /etc/profile.d/imagebuilder.sh')]",
+                                            "[concat('sudo echo ''export WORKSPACE_KEY=',listKeys(variables('wsResourceId'), '2015-11-01-preview').primarySharedKey,''' >> /etc/profile.d/imagebuilder.sh')]",
+                                            "[concat('sudo echo ''export POWERSTIG_VER=', parameters('powerStigVersion'),''' >> /etc/profile.d/imagebuilder.sh')]",
+                                            "[concat('sudo echo ''export STIG_OSVER=', parameters('osVersion'),''' >> /etc/profile.d/imagebuilder.sh')]",
+                                            "[concat('sudo echo ''export STIG_VER=', parameters('stigVersion'),''' >> /etc/profile.d/imagebuilder.sh')]"
+                                        ]
+                                    }
+                                ],
+                                "distribute": [
+                                    {
+                                        "type": "SharedImage",
+                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'),'/versions/1.0.1')]",
+                                        "runOutputName": "[parameters('imageTemplateName')]",
+                                        "artifactTags": {
+                                            "source": "azureVmImageBuilder",
+                                            "baseosimg": "linux"
+                                        },
+                                        "replicationRegions": [
+                                            "usgovvirginia",
+                                            "usgovarizona"
+                                        ]
+                                    },
+                                    {
+                                        "type": "VHD",
+                                        "runOutputName": "RHEL8gen1_STIG_v2R1"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
                 },
                 "parameters": {
                     "identityId": {
