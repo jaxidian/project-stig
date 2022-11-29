@@ -27,7 +27,7 @@
         "workspaceUrl": "[uri(deployment().properties.templateLink.uri, '../nested/workspace.json')]",
         "workspaceDashboardUrl": "[uri(deployment().properties.templateLink.uri, '../nested/dashboard.json')]",
         "managedIdentityUrl": "[uri(deployment().properties.templateLink.uri, '../nested/managedIdentity.json')]",
-        "imageGalleryUrl": "[uri(deployment().properties.templateLink.uri, '../nested/imageGallery.json')]",
+        //"imageGalleryUrl": "[uri(deployment().properties.templateLink.uri, '../nested/imageGallery.json')]",
         "win10mageTemplateUrl": "[uri(deployment().properties.templateLink.uri, '../imageTemplates/windows10Evd.json')]",
         "srv2019imageTemplateUrl": "[uri(deployment().properties.templateLink.uri, '../imageTemplates/windows2019.json')]",
         "rhel8imageTemplateUrl": "[uri(deployment().properties.templateLink.uri, '../imageTemplates/redhat8.json')]",
@@ -119,9 +119,36 @@
             ],
             "properties": {
                 "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[variables('imageGalleryUrl')]",
-                    "contentVersion": "1.0.0.0"
+                "expressionEvaluationOptions": {
+                    "scope": "inner"
+                },
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "name": {
+                            "type": "string"
+                        }
+                    },
+                    "variables": {
+                        "imageGalleryName": "[concat(replace(parameters('name'),'-',''), '_SIG')]"
+                    },
+                    "resources": [
+                        {
+                            "type": "Microsoft.Compute/galleries",
+                            "name": "[variables('imageGalleryName')]",
+                            "apiVersion": "2019-03-01",
+                            "location": "[resourceGroup().location]",
+                            "properties": {},
+                            "tags": {}
+                        }
+                    ],
+                    "outputs": {
+                        "galleryName": {
+                            "type": "string",
+                            "value": "[variables('imageGalleryName')]"
+                        }
+                    }
                 },
                 "parameters": {
                     "name": {
