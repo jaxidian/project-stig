@@ -370,7 +370,7 @@
                                     "minRecommendedMemory": "32",
                                     "maxRecommendedMemory": "48",
                                     "hyperVGeneration": "V2"
-                                }//,
+                                } //,
                                 // {
                                 //     "imageDefinitionName": "Win2019_STIG_Small",
                                 //     "osType": "Windows",
@@ -538,7 +538,7 @@
                                 }
                             },
                             "properties": {
-                                "buildTimeoutInMinutes": 100,
+                                "buildTimeoutInMinutes": 200,
                                 "vmProfile": {
                                     "vmSize": "Standard_D4_v5",
                                     "osDiskSizeGB": 127
@@ -582,8 +582,8 @@
                                     },
                                     {
                                         "type": "WindowsRestart",
-                                        "restartCommand": "shutdown /r /f /t 0",
-                                        "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
+                                        //"restartCommand": "shutdown /r /f /t 0",
+                                        //"restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
                                         "restartTimeout": "2h"
                                     },
                                     {
@@ -597,8 +597,8 @@
                                     },
                                     {
                                         "type": "WindowsRestart",
-                                        "restartCommand": "shutdown /r /f /t 0",
-                                        "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
+                                        //"restartCommand": "shutdown /r /f /t 0",
+                                        //"restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
                                         "restartTimeout": "2h"
                                     }
                                 ],
@@ -725,7 +725,7 @@
                                 }
                             },
                             "properties": {
-                                "buildTimeoutInMinutes": 100,
+                                "buildTimeoutInMinutes": 200,
                                 "vmProfile": {
                                     "vmSize": "Standard_D4_v5",
                                     "osDiskSizeGB": 127
@@ -776,6 +776,12 @@
                                         "scriptUri": "[variables('setPowerStigUrl')]"
                                     },
                                     {
+                                        "type": "WindowsRestart",
+                                        //"restartCommand": "shutdown /r /f /t 0",
+                                        //"restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
+                                        "restartTimeout": "2h"
+                                    },
+                                    {
                                         "type": "WindowsUpdate",
                                         "searchCriteria": "IsInstalled=0",
                                         "filters": [
@@ -786,8 +792,8 @@
                                     },
                                     {
                                         "type": "WindowsRestart",
-                                        "restartCommand": "shutdown /r /f /t 0",
-                                        "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
+                                        //"restartCommand": "shutdown /r /f /t 0",
+                                        //"restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
                                         "restartTimeout": "2h"
                                     }
                                 ],
@@ -844,7 +850,7 @@
                     }
                 }
             }
-        }/*,
+        } /*,
         {
             "name": "redhatlinux8STIGtemplate",
             "type": "Microsoft.Resources/deployments",
@@ -941,10 +947,10 @@
                                 "userIdentity": "enabled"
                             },
                             "properties": {
-                                "buildTimeoutInMinutes": 100,
+                                "buildTimeoutInMinutes": 200,
                                 "vmProfile": {
-                                    "vmSize": "Standard_D1_v2",
-                                    "osDiskSizeGB": 100
+                                    "vmSize": "Standard_D4_v5",
+                                    "osDiskSizeGB": 127
                                 },
                                 "source": {
                                     "type": "PlatformImage",
