@@ -26,7 +26,9 @@
     "variables": {
         "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
         "srv2019MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/WindowsServer2019v2r4/localhost.mof')]",
-        "rhel8ScriptUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/redhat8stig.sh')]"
+        "script1Url": ""
+        /*,
+        "rhel8ScriptUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/redhat8stig.sh')]" */
     },
     "resources": [
         {
@@ -829,7 +831,7 @@
                     }
                 }
             }
-        },
+        }/*,
         {
             "name": "redhatlinux8STIGtemplate",
             "type": "Microsoft.Resources/deployments",
@@ -950,12 +952,12 @@
                                             "[concat('sudo echo ''export STIG_OSVER=', parameters('osVersion'),''' >> /etc/profile.d/imagebuilder.sh')]",
                                             "[concat('sudo echo ''export STIG_VER=', parameters('stigVersion'),''' >> /etc/profile.d/imagebuilder.sh')]"
                                         ]
-                                    }/*,
+                                    },
                                     {
                                         "type": "Shell",
                                         "name": "scriptRun",
                                         "scriptUri": "[parameters('customizescriptpath')]"
-                                    }*/
+                                    }
                                 ],
                                 "distribute": [
                                     {
@@ -1007,7 +1009,7 @@
                     }
                 }
             }
-        }
+        }*/
     ],
     "outputs": {}
 }
