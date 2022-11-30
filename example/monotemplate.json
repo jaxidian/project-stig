@@ -950,12 +950,12 @@
                                             "[concat('sudo echo ''export STIG_OSVER=', parameters('osVersion'),''' >> /etc/profile.d/imagebuilder.sh')]",
                                             "[concat('sudo echo ''export STIG_VER=', parameters('stigVersion'),''' >> /etc/profile.d/imagebuilder.sh')]"
                                         ]
-                                    },
+                                    }/*,
                                     {
                                         "type": "Shell",
                                         "name": "scriptRun",
                                         "scriptUri": "[parameters('customizescriptpath')]"
-                                    }
+                                    }*/
                                 ],
                                 "distribute": [
                                     {
