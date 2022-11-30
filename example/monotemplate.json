@@ -581,6 +581,12 @@
                                         "scriptUri": "[variables('setPowerStigUrl')]"
                                     },
                                     {
+                                        "type": "WindowsRestart",
+                                        "restartCommand": "shutdown /r /f /t 0",
+                                        "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
+                                        "restartTimeout": "2h"
+                                    },
+                                    {
                                         "type": "WindowsUpdate",
                                         "searchCriteria": "IsInstalled=0",
                                         "filters": [
@@ -588,6 +594,12 @@
                                             "include:$true"
                                         ],
                                         "updateLimit": 40
+                                    },
+                                    {
+                                        "type": "WindowsRestart",
+                                        "restartCommand": "shutdown /r /f /t 0",
+                                        "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\azureImageBuilderRestart.txt",
+                                        "restartTimeout": "2h"
                                     }
                                 ],
                                 "distribute": [
