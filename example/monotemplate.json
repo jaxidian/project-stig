@@ -370,7 +370,7 @@
                                     "minRecommendedMemory": "32",
                                     "maxRecommendedMemory": "48",
                                     "hyperVGeneration": "V2"
-                                } //,
+                                },
                                 // {
                                 //     "imageDefinitionName": "Win2019_STIG_Small",
                                 //     "osType": "Windows",
@@ -408,20 +408,19 @@
                                 //     "minRecommendedMemory": "32",
                                 //     "maxRecommendedMemory": "48"
                                 // },
-                                // Removing RHEL as it is out of scope for now. It mostly worked but there was a race condition (I think) that resulted in errors deleting networking resources once the customize script was ran.
-                                //{
-                                //    "imageDefinitionName": "Redhat8_STIG",
-                                //    "osType": "Linux",
-                                //    "osState": "Generalized",
-                                //    "publisher": "Redhat",
-                                //    "offer": "RHEL",
-                                //    "sku": "redhat-8-stig",
-                                //    "minRecommendedvCPUs": "2",
-                                //    "maxRecommendedvCPUs": "8",
-                                //    "minRecommendedMemory": "32",
-                                //    "maxRecommendedMemory": "48",
-                                //    "hyperVGeneration": "V1"
-                                //}
+                                {
+                                    "imageDefinitionName": "Redhat8_STIG",
+                                    "osType": "Linux",
+                                    "osState": "Generalized",
+                                    "publisher": "Redhat",
+                                    "offer": "RHEL",
+                                    "sku": "redhat-8-stig",
+                                    "minRecommendedvCPUs": "2",
+                                    "maxRecommendedvCPUs": "8",
+                                    "minRecommendedMemory": "32",
+                                    "maxRecommendedMemory": "48",
+                                    "hyperVGeneration": "V1"
+                                }
                             ]
                         },
                         "galleryName": {
@@ -850,7 +849,7 @@
                     }
                 }
             }
-        } /*,
+        },
         {
             "name": "redhatlinux8STIGtemplate",
             "type": "Microsoft.Resources/deployments",
@@ -976,6 +975,13 @@
                                         "type": "Shell",
                                         "name": "scriptRun",
                                         "scriptUri": "[parameters('customizescriptpath')]"
+                                    },
+                                    {
+                                        "type": "Shell",
+                                        "name": "setupBuildPath",
+                                        "inline": [
+                                            "sudo reboot"
+                                        ]
                                     }
                                 ],
                                 "distribute": [
@@ -1028,7 +1034,7 @@
                     }
                 }
             }
-        }*/
+        }
     ],
     "outputs": {}
 }
