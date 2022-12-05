@@ -93,7 +93,7 @@
                             "name": "[variables('automationAccountName')]",
                             "type": "Microsoft.Automation/automationAccounts",
                             "apiVersion": "2015-10-31",
-                            "location": "usgovarizona",
+                            "location": "usgovtexas",
                             "tags": {
                             },
                             "properties": {
@@ -612,7 +612,7 @@
                                         },
                                         "replicationRegions": [
                                             "usgovvirginia",
-                                            "usgovarizona"
+                                            "usgovtexas"
                                         ]
                                     },
                                     {
@@ -807,7 +807,7 @@
                                         },
                                         "replicationRegions": [
                                             "usgovvirginia",
-                                            "usgovarizona"
+                                            "usgovtexas"
                                         ]
                                     },
                                     {
@@ -998,7 +998,7 @@
         //                                 },
         //                                 "replicationRegions": [
         //                                     "usgovvirginia",
-        //                                     "usgovarizona"
+        //                                     "usgovtexas"
         //                                 ]
         //                             },
         //                             {
