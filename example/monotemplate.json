@@ -973,14 +973,16 @@
                                     {
                                         "type": "Shell",
                                         "name": "scriptRun",
-                                        "scriptUri": "[parameters('customizescriptpath')]"
+                                        "scriptUri": "[parameters('customizescriptpath')]",
+                                        "validExitCodes": [0, 2300218]  // This is the exit code for a reboot. Alternatively, we might be able to set "expect_disconnect": true.
                                     },
                                     {
                                         "type": "Shell",
                                         "name": "setupBuildPath",
                                         "inline": [
                                             "sudo reboot"
-                                        ]
+                                        ],
+                                        "validExitCodes": [0, 2300218]  // This is the exit code for a reboot. Alternatively, we might be able to set "expect_disconnect": true.
                                     }
                                 ],
                                 "distribute": [
