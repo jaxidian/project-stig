@@ -20,13 +20,29 @@
                 "description": "Version of PowerSTIG to use. Previous default was 4.7.1"
             },
             "defaultValue": "4.13.1"
+        },
+        "_artifactsLocation": {
+            "type": "string",
+            "defaultValue": "[deployment().properties.templateLink.uri]"
+        },
+        "_artifactsLocationSasToken": {
+            "type": "securestring"
         }
     },
     "functions": [],
     "variables": {
-        "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
-        "srv2019MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/WindowsServer2019v2r4/localhost.mof')]",
-        "script1Url": ""/*,
+        "win10Assets": {
+            //"win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('_artifactsLocationSasToken')))]",
+            "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
+            "setPowerStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/setPowerStig.ps1')]",
+            "setAuditingStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/auditStig.ps1')]"
+        },
+        "srv2019Assets": {
+            "srv2019MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/WindowsServer2019v2r4/localhost.mof')]",
+            "setPowerStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/setPowerStig.ps1')]",
+            "setAuditingStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/auditStig.ps1')]"
+        }
+        /*,
         "rhel8ScriptUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/redhat8stig.sh')]"*/
     },
     "resources": [
@@ -490,6 +506,12 @@
                         "mofUrl": {
                             "type": "string"
                         },
+                        "setPowerStigUrl": {
+                            "type": "string"
+                        },
+                        "setAuditingStigUrl": {
+                            "type": "string"
+                        },
                         "identityId": {
                             "type": "string"
                         },
@@ -513,8 +535,8 @@
                         }
                     },
                     "variables": {
-                        "setPowerStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/setPowerStig.ps1",
-                        "setAuditingStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/auditStig.ps1",
+                        "setPowerStigUrl": "[parameters('setPowerStigUrl')]",
+                        "setAuditingStigUrl": "[parameters('setAuditingStigUrl')]",
                         "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     },
                     "resources": [
@@ -629,7 +651,13 @@
                         "value": "[reference('managedIdentityDeploy').outputs.identityName.value]"
                     },
                     "mofUrl": {
-                        "value": "[variables('win10MofUrl')]"
+                        "value": "[variables('win10Assets').win10MofUrl]"
+                    },
+                    "setPowerStigUrl": {
+                        "value": "[variables('win10Assets').setPowerStigUrl]"
+                    },
+                    "setAuditingStigUrl": {
+                        "value": "[variables('win10Assets').setAuditingStigUrl]"
                     },
                     "galleryName": {
                         "value": "[reference('imageGalleryDeploy').outputs.galleryName.value]"
@@ -672,6 +700,12 @@
                         "mofUrl": {
                             "type": "string"
                         },
+                        "setPowerStigUrl": {
+                            "type": "string"
+                        },
+                        "setAuditingStigUrl": {
+                            "type": "string"
+                        },
                         "identityId": {
                             "type": "string"
                         },
@@ -698,8 +732,8 @@
                         }
                     },
                     "variables": {
-                        "setPowerStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/setPowerStignoaudit.ps1",
-                        "setAuditingStigUrl": "https://raw.githubusercontent.com/jaxidian/project-stig/shanedev/scripts/auditStig.ps1",
+                        "setPowerStigUrl": "[parameters('setPowerStigUrl')]",
+                        "setAuditingStigUrl": "[parameters('setAuditingStigUrl')]",
                         "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     },
                     "resources": [
@@ -824,7 +858,13 @@
                         "value": "[reference('managedIdentityDeploy').outputs.identityName.value]"
                     },
                     "mofUrl": {
-                        "value": "[variables('srv2019MofUrl')]"
+                        "value": "[variables('srv2019Assets').srv2019MofUrl]"
+                    },
+                    "setPowerStigUrl": {
+                        "value": "[variables('srv2019Assets').setPowerStigUrl]"
+                    },
+                    "setAuditingStigUrl": {
+                        "value": "[variables('srv2019Assets').setAuditingStigUrl]"
                     },
                     "galleryName": {
                         "value": "[reference('imageGalleryDeploy').outputs.galleryName.value]"
