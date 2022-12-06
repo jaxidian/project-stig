@@ -254,7 +254,7 @@
                     },
                     "functions": [],
                     "variables": {
-                        "identityName": "'id-', [concat(parameters('name'), '-', uniqueString(resourceGroup().id))]",
+                        "identityName": "[concat('id-', parameters('name'), '-', uniqueString(resourceGroup().id))]",
                         "bootstrapRoleAssignmentId": "[guid(concat(resourceGroup().id, 'contributor'))]"
                     },
                     "resources": [
