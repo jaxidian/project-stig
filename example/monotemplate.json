@@ -833,7 +833,7 @@
                                 "distribute": [
                                     {
                                         "type": "SharedImage",
-                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.1')]",
+                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.*')]",
                                         "runOutputName": "[parameters('imageTemplateName')]",
                                         "artifactTags": {
                                             "source": "azureVmImageBuilder",
