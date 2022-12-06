@@ -2,10 +2,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "rgName": {
+        "baseName": {
             "type": "string",
             "metadata": {
-                "description": "Name of the resourceGroup to create"
+                "description": "The base name of the resources to create"
             }
         },
         "rgLocation": {
@@ -31,6 +31,7 @@
     },
     "functions": [],
     "variables": {
+        "rgName": "[concat('rg-', parameters('baseName'))]",
         "win10Assets": {
             //"win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('_artifactsLocationSasToken')))]",
             "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
@@ -49,7 +50,7 @@
         {
             "type": "Microsoft.Resources/resourceGroups",
             "apiVersion": "2019-10-01",
-            "name": "[parameters('rgName')]",
+            "name": "[variables('rgName')]",
             "location": "[parameters('rgLocation')]",
             "tags": {
                 "Note": "subscription level deployment"
@@ -60,9 +61,9 @@
             "name": "workspaceDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+                "[resourceId('Microsoft.Resources/resourceGroups/', variables('rgName'))]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -151,7 +152,7 @@
                 },
                 "parameters": {
                     "name": {
-                        "value": "[parameters('rgName')]"
+                        "value": "[parameters('baseName')]"
                     }
                 }
             }
@@ -160,7 +161,7 @@
             "name": "workspaceDashboardDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
                 "workspaceDeploy"
             ],
@@ -233,9 +234,9 @@
             "name": "managedIdentityDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+                "[resourceId('Microsoft.Resources/resourceGroups/', variables('rgName'))]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -253,7 +254,7 @@
                     },
                     "functions": [],
                     "variables": {
-                        "identityName": "[concat(parameters('name'), 'identity', uniqueString(resourceGroup().id))]",
+                        "identityName": "'id-', [concat(parameters('name'), '-', uniqueString(resourceGroup().id))]",
                         "bootstrapRoleAssignmentId": "[guid(concat(resourceGroup().id, 'contributor'))]"
                     },
                     "resources": [
@@ -287,7 +288,7 @@
                 },
                 "parameters": {
                     "name": {
-                        "value": "[parameters('rgName')]"
+                        "value": "[parameters('baseName')]"
                     }
                 }
             }
@@ -296,7 +297,7 @@
             "name": "imageGalleryDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
                 "managedIdentityDeploy"
             ],
@@ -335,7 +336,7 @@
                 },
                 "parameters": {
                     "name": {
-                        "value": "[parameters('rgName')]"
+                        "value": "[parameters('baseName')]"
                     }
                 }
             }
@@ -344,7 +345,7 @@
             "name": "imageDefinitionsDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
                 "imageGalleryDeploy"
             ],
@@ -490,7 +491,7 @@
             "name": "windows10STIGtemplate",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
                 "imageDefinitionsDeploy"
             ],
@@ -684,7 +685,7 @@
             "name": "windows2019STIGtemplate",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[parameters('rgName')]",
+            "resourceGroup": "[variables('rgName')]",
             "dependsOn": [
                 "imageDefinitionsDeploy"
             ],
@@ -895,7 +896,7 @@
         //     "name": "redhatlinux8STIGtemplate",
         //     "type": "Microsoft.Resources/deployments",
         //     "apiVersion": "2019-10-01",
-        //     "resourceGroup": "[parameters('rgName')]",
+        //     "resourceGroup": "[variables('rgName')]",
         //     "dependsOn": [
         //         "imageDefinitionsDeploy"
         //     ],
