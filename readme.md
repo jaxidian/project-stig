@@ -37,7 +37,7 @@ Basic resources used:
 
 1. Shared Image Gallery
 2. Image Definitions
-3. Image Builder Templates
+3. Image Builder Templates (GA in commercial but Preview in US Gov - [expected GA in Q1 2023](https://azure.microsoft.com/en-us/explore/global-infrastructure/products-by-region/?products=image-builder))
 4. GitHub
 5. Log Analytics Workspace
 6. Azure Automation (for future use)
