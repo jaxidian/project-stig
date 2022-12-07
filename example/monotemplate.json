@@ -85,7 +85,10 @@
         "resourceFormalNames": {
             "resourceGroup": "[naming.namer(parameters('globalPrefix'), 'rg', '-', parameters('baseName'))]",
             "deployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), 'workspaceDeploy'))]",
-            "logWorkspace": "[naming.namer(parameters('globalPrefix'), 'log', '-', concat(parameters('baseName'), '-workspace'))]"
+            "logWorkspace": "[naming.namer(parameters('globalPrefix'), 'log', '-', concat(parameters('baseName'), '-workspace'))]",
+            "computeGallery": "[naming.namer(parameters('globalPrefix'), 'gal', '-', concat(parameters('baseName'), '-imagerepo'))]",
+            //"managedIdentity": "[concat('id-', parameters('name'), '-', uniqueString(variables('resourceGroupId')))]"
+            "managedIdentity": "[naming.namer(parameters('globalPrefix'), 'id', '-', concat(parameters('baseName'), '-imagebuilderaccess'))]"
         },
         "workspaceVars": {
             "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
@@ -279,9 +282,8 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
-                        "name": {
-                            "type": "string",
-                            "defaultValue": "tempManagedIdentity"
+                        "formalName": {
+                            "type": "string"
                         },
                         "resourceGroupName": {
                             "type": "string"
@@ -302,7 +304,7 @@
                     "functions": [],
                     "variables": {
                         "resourceGroupId": "[resourceId('Microsoft.Resources/resourceGroups/', parameters('resourceGroupName'))]",
-                        "identityName": "[concat('id-', parameters('name'), '-', uniqueString(variables('resourceGroupId')))]",
+                        "identityName": "[parameters('formalName')]",
                         "bootstrapRoleAssignmentId": "[guid(concat(variables('resourceGroupId'), 'contributor'))]"
                     },
                     "resources": [
@@ -335,8 +337,8 @@
                     }
                 },
                 "parameters": {
-                    "name": {
-                        "value": "[parameters('baseName')]"
+                    "formalName": {
+                        "value": "[variables('resourceFormalNames').managedIdentity]"
                     },
                     "resourceGroupName": {
                         "value": "[variables('resourceFormalNames').resourceGroup]"
@@ -364,7 +366,7 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
-                        "name": {
+                        "formalName": {
                             "type": "string"
                         },
                         "location": {
@@ -381,7 +383,7 @@
                         }
                     },
                     "variables": {
-                        "imageGalleryName": "[concat(replace(parameters('name'),'-',''), '_SIG')]"
+                        "imageGalleryName": "[parameters('formalName')]"
                     },
                     "resources": [
                         {
@@ -401,8 +403,8 @@
                     }
                 },
                 "parameters": {
-                    "name": {
-                        "value": "[parameters('baseName')]"
+                    "formalName": {
+                        "value": "[variables('resourceFormalNames').computeGallery]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -562,7 +564,7 @@
                 },
                 "parameters": {
                     "galleryName": {
-                        "value": "[reference('imageGalleryDeploy').outputs.galleryName.value]"
+                        "value": "[variables('resourceFormalNames').computeGallery]"
                     },
                     "location": {
                         "value": "[parameters('location')]"
@@ -596,7 +598,7 @@
                         "setAuditingStigUrl": {
                             "type": "string"
                         },
-                        "identityId": {
+                        "managedIdentityFormalName": {
                             "type": "string"
                         },
                         "galleryName": {
@@ -637,7 +639,7 @@
                             "identity": {
                                 "type": "UserAssigned",
                                 "userAssignedIdentities": {
-                                    "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('identityId'))]": {
+                                    "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('managedIdentityFormalName'))]": {
 
                                     }
                                 }
@@ -731,8 +733,8 @@
                     ]
                 },
                 "parameters": {
-                    "identityId": {
-                        "value": "[reference('managedIdentityDeploy').outputs.identityName.value]"
+                    "managedIdentityFormalName": {
+                        "value": "[variables('resourceFormalNames').managedIdentity]"
                     },
                     "mofUrl": {
                         "value": "[variables('win10Assets').win10MofUrl]"
@@ -744,10 +746,10 @@
                         "value": "[variables('win10Assets').setAuditingStigUrl]"
                     },
                     "galleryName": {
-                        "value": "[reference('imageGalleryDeploy').outputs.galleryName.value]"
+                        "value": "[variables('resourceFormalNames').computeGallery]"
                     },
                     "workspaceName": {
-                        "value": "[reference('workspaceDeploy').outputs.workspaceName.value]"
+                        "value": "[variables('resourceFormalNames').logWorkspace]"
                     },
                     "imageTemplateName": {
                         "value": "Win10WVDw365_STIG"
@@ -790,7 +792,7 @@
                         "setAuditingStigUrl": {
                             "type": "string"
                         },
-                        "identityId": {
+                        "managedIdentityFormalName": {
                             "type": "string"
                         },
                         "galleryName": {
@@ -836,7 +838,7 @@
                             "identity": {
                                 "type": "UserAssigned",
                                 "userAssignedIdentities": {
-                                    "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('identityId'))]": {
+                                    "[resourceID('Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('managedIdentityFormalName'))]": {
 
                                     }
                                 }
@@ -938,8 +940,8 @@
                     ]
                 },
                 "parameters": {
-                    "identityId": {
-                        "value": "[reference('managedIdentityDeploy').outputs.identityName.value]"
+                    "managedIdentityFormalName": {
+                        "value": "[variables('resourceFormalNames').managedIdentity]"
                     },
                     "mofUrl": {
                         "value": "[variables('srv2019Assets').srv2019MofUrl]"
@@ -951,10 +953,10 @@
                         "value": "[variables('srv2019Assets').setAuditingStigUrl]"
                     },
                     "galleryName": {
-                        "value": "[reference('imageGalleryDeploy').outputs.galleryName.value]"
+                        "value": "[variables('resourceFormalNames').computeGallery]"
                     },
                     "workspaceName": {
-                        "value": "[reference('workspaceDeploy').outputs.workspaceName.value]"
+                        "value": "[variables('resourceFormalNames').logWorkspace]"
                     },
                     "imageTemplateName": {
                         "value": "Win2019_STIG"
