@@ -75,7 +75,7 @@
                         "type": "string",
                         "value": "[if(equals(parameters('globalPrefix'), ''),
                                     concat(parameters('typePrefix'), parameters('delimiter'), parameters('name')),
-                                    concat(parameters('globalPrefix'), parameters('typePrefix'), parameters('delimiter'), parameters('name')))]"
+                                    concat(parameters('globalPrefix'), parameters('delimiter'), parameters('typePrefix'), parameters('delimiter'), parameters('name')))]"
                     }
                 }
             }
@@ -84,10 +84,9 @@
     "variables": {
         "resourceFormalNames": {
             "resourceGroup": "[naming.namer(parameters('globalPrefix'), 'rg', '-', parameters('baseName'))]",
-            "deployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), 'workspaceDeploy'))]",
+            "deployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-workspace'))]",
             "logWorkspace": "[naming.namer(parameters('globalPrefix'), 'log', '-', concat(parameters('baseName'), '-workspace'))]",
             "computeGallery": "[naming.namer(parameters('globalPrefix'), 'gal', '-', concat(parameters('baseName'), '-imagerepo'))]",
-            //"managedIdentity": "[concat('id-', parameters('name'), '-', uniqueString(variables('resourceGroupId')))]"
             "managedIdentity": "[naming.namer(parameters('globalPrefix'), 'id', '-', concat(parameters('baseName'), '-imagebuilderaccess'))]"
         },
         "workspaceVars": {
