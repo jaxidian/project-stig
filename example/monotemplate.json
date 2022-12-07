@@ -2,17 +2,31 @@
     "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "globalPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "This prefix will be applied at the beginning of all resources possible. An empty string is a valid input if this is not desireable to use."
+            },
+            "defaultValue": "plat-pto-"
+        },
         "baseName": {
             "type": "string",
             "metadata": {
                 "description": "The base name of the resources to create"
-            }
+            },
+            "defaultValue": "image-factory-test"
         },
-        "rgLocation": {
+        "location": {
             "type": "string",
             "metadata": {
-                "description": "Location for the resourceGroup"
-            }
+                "description": "Location for the resources"
+            },
+            "allowedValues": [
+                "usgovvirginia",
+                "usgovarizona",
+                "usgovtexas"
+            ],
+            "defaultValue": "usgovvirginia"
         },
         "powerStigVersion": {
             "type": "string",
@@ -26,14 +40,52 @@
             "defaultValue": "[deployment().properties.templateLink.uri]"
         },
         "_artifactsLocationSasToken": {
-            "type": "securestring"
+            "type": "securestring",
+            "defaultValue": ""
         }
     },
-    "functions": [],
+    "functions": [
+        {
+            "namespace": "naming",
+            "members": {
+                "namer": {
+                    "parameters": [
+                        {
+                            "name": "globalPrefix",
+                            "type": "string"
+                        },
+                        {
+                            "name": "typePrefix",
+                            "type": "string"
+                        },
+                        {
+                            "name": "delimiter",
+                            "type": "string"
+                        },
+                        {
+                            "name": "name",
+                            "type": "string"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[if(equals(parameters('globalPrefix'), ''),
+                                    concat(parameters('typePrefix'), parameters('delimiter'), parameters('name')),
+                                    concat(parameters('globalPrefix'), parameters('typePrefix'), parameters('delimiter'), parameters('name')))]"
+                    }
+                }
+            }
+        }
+    ],
     "variables": {
-        "rgName": "[concat('rg-', parameters('baseName'))]",
+        "rgFormalName": "[naming.namer(parameters('globalPrefix'), 'rg', '-', parameters('baseName'))]",
+        "artifactsLocationSasToken": "[if(equals(parameters('_artifactsLocationSasToken'), ''),
+                                        if(contains(deployment().properties.templateLink.uri, '?'),
+                                            split(deployment().properties.templateLink.uri, 'mainTemplate.json')[1],
+                                            ''),
+                                        parameters('_artifactsLocationSasToken'))]",
         "win10Assets": {
-            //"win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('_artifactsLocationSasToken')))]",
+            //"win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('artifactsLocationSasToken')))]",
             "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
             "setPowerStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/setPowerStig.ps1')]",
             "setAuditingStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/auditStig.ps1')]"
@@ -48,22 +100,23 @@
     },
     "resources": [
         {
+            "name": "[variables('rgFormalName')]",
             "type": "Microsoft.Resources/resourceGroups",
             "apiVersion": "2019-10-01",
-            "name": "[variables('rgName')]",
-            "location": "[parameters('rgLocation')]",
+            "location": "[parameters('location')]",
             "tags": {
                 "Note": "subscription level deployment"
             },
             "properties": {}
         },
         {
-            "name": "workspaceDeploy",
+            //"name": "[concat('deploy-', parameters('baseName'), 'workspaceDeploy')]",
+            "name": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), 'workspaceDeploy'))]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups/', variables('rgName'))]"
+                "[resourceId('Microsoft.Resources/resourceGroups/', variables('rgFormalName'))]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -74,18 +127,74 @@
                     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
                     "parameters": {
-                        "name": {
-                            "type": "string"
+                        "globalPrefix": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "This prefix will be applied at the beginning of all resources possible. An empty string is a valid input if this is not desireable to use."
+                            },
+                            "defaultValue": "[parameters('globalPrefix')]"
+                        },
+                        "baseName": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "The base name of the resources to create"
+                            },
+                            "defaultValue": "[parameters('baseName')]"
+                        },
+                        "location": {
+                            "type": "string",
+                            "metadata": {
+                                "description": "Location for the resources"
+                            },
+                            "allowedValues": [
+                                "usgovvirginia",
+                                "usgovarizona",
+                                "usgovtexas"
+                            ],
+                            "defaultValue":"[parameters('location')]"
                         }
                     },
-                    "functions": [],
+                    "functions": [
+                        {
+                            "namespace": "naming",
+                            "members": {
+                                "namer": {
+                                    "parameters": [
+                                        {
+                                            "name": "globalPrefix",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "typePrefix",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "delimiter",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "name",
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "output": {
+                                        "type": "string",
+                                        "value": "[if(equals(parameters('globalPrefix'), ''),
+                                    concat(parameters('typePrefix'), parameters('delimiter'), parameters('name')),
+                                    concat(parameters('globalPrefix'), parameters('typePrefix'), parameters('delimiter'), parameters('name')))]"
+                                    }
+                                }
+                            }
+                        }
+                    ],
                     "variables": {
-                        "workspaceName": "[replace(concat(parameters('name'),'-WS-', resourceGroup().location),'_','')]",
-                        "automationAccountName": "[replace(concat(parameters('name'),'-AA'),'_','')]",
+                        "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
+                        "workspaceFormalName": "[naming.namer(parameters('globalPrefix'), 'log', '-', variables('workspaceBaseName'))]",
                         "solutionArray": {
                             "solutions": [
                                 {
-                                    "name": "[concat('SecurityInsights', '(', variables('workspaceName'), ')')]",
+                                    //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
+                                    "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'))]",
                                     "galleryName": "SecurityInsights"
                                 }
                             ]
@@ -93,10 +202,10 @@
                     },
                     "resources": [
                         {
-                            "name": "[variables('workspaceName')]",
+                            "name": "[variables('workspaceFormalName')]",
                             "type": "Microsoft.OperationalInsights/workspaces",
                             "apiVersion": "2015-11-01-preview", /* "2022-10-01" is the latest */
-                            "location": "usgovvirginia",
+                            "location": "[parameters('location')]",
                             "properties": {
                                 "sku": {
                                     "name": "PerGB2018"
@@ -107,10 +216,11 @@
                             }
                         },
                         {
-                            "name": "[variables('automationAccountName')]",
+                            //"name": "[naming.namer(parameters('globalPrefix'), 'aa', '-', variables('workspaceBaseName'))]",
+                            "name": "[naming.namer(parameters('globalPrefix'), 'aa', '-', concat(parameters('baseName'), '-imagecreation'))]",
                             "type": "Microsoft.Automation/automationAccounts",
                             "apiVersion": "2015-10-31",
-                            "location": "usgovtexas",
+                            "location": "[parameters('location')]",
                             "tags": {
                             },
                             "properties": {
@@ -121,19 +231,20 @@
                         },
                         {
                             "apiVersion": "2015-11-01-preview",
-                            "location": "[resourceGroup().location]",
-                            "name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
+                            "location": "[parameters('location')]",
+                            //"name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
+                            "name": "[variables('solutionArray').solutions[copyIndex()].formalName]",
                             "type": "Microsoft.OperationsManagement/solutions",
                             "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('solutionArray').solutions[copyIndex()].Name)]",
                             "dependsOn": [
-                                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
+                                "[concat('Microsoft.OperationalInsights/workspaces/', variables('workspaceFormalName'))]"
                             ],
                             "copy": {
                                 "name": "solutionCopy",
                                 "count": "[length(variables('solutionArray').solutions)]"
                             },
                             "properties": {
-                                "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('workspaceName'))]"
+                                "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('workspaceFormalName'))]"
                             },
                             "plan": {
                                 "name": "[variables('solutionArray').solutions[copyIndex()].Name]",
@@ -146,14 +257,14 @@
                     "outputs": {
                         "workspaceName": {
                             "type": "string",
-                            "value": "[variables('workspaceName')]"
+                            "value": "[variables('workspaceFormalName')]"
                         }
                     }
                 },
                 "parameters": {
-                    "name": {
-                        "value": "[parameters('baseName')]"
-                    }
+                    "globalPrefix": { "value": "[parameters('globalPrefix')]" },
+                    "baseName": { "value": "[parameters('baseName')]" },
+                    "location": { "value": "[parameters('location')]" }
                 }
             }
         },
@@ -161,7 +272,7 @@
             "name": "workspaceDashboardDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
                 "workspaceDeploy"
             ],
@@ -234,9 +345,9 @@
             "name": "managedIdentityDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups/', variables('rgName'))]"
+                "[resourceId('Microsoft.Resources/resourceGroups/', variables('rgFormalName'))]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -297,7 +408,7 @@
             "name": "imageGalleryDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
                 "managedIdentityDeploy"
             ],
@@ -345,7 +456,7 @@
             "name": "imageDefinitionsDeploy",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
                 "imageGalleryDeploy"
             ],
@@ -491,7 +602,7 @@
             "name": "windows10STIGtemplate",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
                 "imageDefinitionsDeploy"
             ],
@@ -685,7 +796,7 @@
             "name": "windows2019STIGtemplate",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
-            "resourceGroup": "[variables('rgName')]",
+            "resourceGroup": "[variables('rgFormalName')]",
             "dependsOn": [
                 "imageDefinitionsDeploy"
             ],
@@ -896,7 +1007,7 @@
         //     "name": "redhatlinux8STIGtemplate",
         //     "type": "Microsoft.Resources/deployments",
         //     "apiVersion": "2019-10-01",
-        //     "resourceGroup": "[variables('rgName')]",
+        //     "resourceGroup": "[variables('rgFormalName')]",
         //     "dependsOn": [
         //         "imageDefinitionsDeploy"
         //     ],
