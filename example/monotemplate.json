@@ -99,15 +99,12 @@
         },
         "workspaceVars": {
             "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
-            "solutionArray": {
-                "solutions": [
-                    {
-                        //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
-                        "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
-                        "galleryName": "SecurityInsights"
-                    }
-                ]
-            }
+            "solution":
+                {
+                    //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
+                    "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
+                    "galleryName": "SecurityInsights"
+                }
         },
         "workbookVars": {
             "workbookDisplayName": "STIG Compliance",
@@ -207,24 +204,20 @@
                             "apiVersion": "2015-11-01-preview",
                             "location": "[parameters('location')]",
                             //"name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
-                            "name": "[variables('workspaceVars').solutionArray.solutions[copyIndex()].formalName]",
+                            "name": "[variables('workspaceVars').solution.formalName]",
                             "type": "Microsoft.OperationsManagement/solutions",
-                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('workspaceVars').solutionArray.solutions[copyIndex()].Name)]",
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('workspaceVars').solution.formalName)]",
                             "dependsOn": [
-                                "[concat('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').logWorkspace)]"
+                                "[variables('resourceFormalNames').logWorkspace]"
                             ],
-                            "copy": {
-                                "name": "solutionCopy",
-                                "count": "[length(variables('workspaceVars').solutionArray.solutions)]"
-                            },
                             "properties": {
                                 "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').logWorkspace)]"
                             },
                             "plan": {
-                                "name": "[variables('workspaceVars').solutionArray.solutions[copyIndex()].Name]",
+                                "name": "[variables('workspaceVars').solution.formalName]",
                                 "publisher": "Microsoft",
                                 "promotionCode": "",
-                                "product": "[concat('OMSGallery/', variables('workspaceVars').solutionArray.solutions[copyIndex()].galleryName)]"
+                                "product": "[concat('OMSGallery/', variables('workspaceVars').solution.galleryName)]"
                             }
                         }
                     ],
