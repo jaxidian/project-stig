@@ -99,12 +99,11 @@
         },
         "workspaceVars": {
             "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
-            "solution":
-                {
-                    //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
-                    "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
-                    "galleryName": "SecurityInsights"
-                }
+            "solution": {
+                //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
+                "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
+                "galleryName": "SecurityInsights"
+            }
         },
         "workbookVars": {
             "workbookDisplayName": "STIG Compliance",
@@ -525,7 +524,8 @@
                                 "usgovtexas"
                             ],
                             "defaultValue": "usgovvirginia"
-                        }                    },
+                        }
+                    },
                     "variables": {},
                     "resources": [
                         {
@@ -618,19 +618,31 @@
                         },
                         "osVersion": {
                             "type": "string"
+                        },
+                        "resourceGroupLocation": {
+                            "type": "string"
+                            //"defaultValue": "[resourceGroup().location]"
+                        },
+                        "resourceGroupName": {
+                            "type": "string"
+                            //"defaultValue": "[resourceGroup().name]"
+                        },
+                        "resourceGroupId": {
+                            "type": "string"
+                            //"defaultValue": "[resourceGroup().id]"
                         }
                     },
                     "variables": {
                         "setPowerStigUrl": "[parameters('setPowerStigUrl')]",
                         "setAuditingStigUrl": "[parameters('setAuditingStigUrl')]",
-                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',parameters('resourceGroupName'), '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     },
                     "resources": [
                         {
                             "name": "[parameters('imageTemplateName')]",
                             "type": "Microsoft.VirtualMachineImages/imageTemplates",
                             "apiVersion": "2020-02-14",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('resourceGroupLocation')]",
                             "dependsOn": [],
                             "tags": {
                                 "imagebuilderTemplate": "AzureImageBuilderSIG",
@@ -712,7 +724,7 @@
                                 "distribute": [
                                     {
                                         "type": "SharedImage",
-                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.0')]",
+                                        "galleryImageId": "[concat(parameters('resourceGroupId'),'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.0')]",
                                         "runOutputName": "[parameters('imageTemplateName')]",
                                         "artifactTags": {
                                             "source": "azureVmImageBuilder",
@@ -762,6 +774,16 @@
                     },
                     "osVersion": {
                         "value": "10"
+                    },
+                    "resourceGroupLocation": {
+                        "value": "[parameters('location')]"
+                    },
+                    "resourceGroupName": {
+                        "value": "[variables('resourceFormalNames').resourceGroup]"
+                    },
+                    "resourceGroupId": {
+                        "value": "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceFormalNames').resourceGroup)]"
+                        //"value": "[resourceGroup().id]"
                     }
                 }
             }
@@ -815,19 +837,31 @@
                         },
                         "osRole": {
                             "type": "string"
+                        },
+                        "resourceGroupLocation": {
+                            "type": "string"
+                            //"defaultValue": "[resourceGroup().location]"
+                        },
+                        "resourceGroupName": {
+                            "type": "string"
+                            //"defaultValue": "[resourceGroup().name]"
+                        },
+                        "resourceGroupId": {
+                            "type": "string"
+                            //"defaultValue": "[resourceGroup().id]"
                         }
                     },
                     "variables": {
                         "setPowerStigUrl": "[parameters('setPowerStigUrl')]",
                         "setAuditingStigUrl": "[parameters('setAuditingStigUrl')]",
-                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',parameters('resourceGroupName'), '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     },
                     "resources": [
                         {
                             "name": "[parameters('imageTemplateName')]",
                             "type": "Microsoft.VirtualMachineImages/imageTemplates",
                             "apiVersion": "2020-02-14",
-                            "location": "[resourceGroup().location]",
+                            "location": "[parameters('resourceGroupLocation')]",
                             "dependsOn": [
 
                             ],
@@ -919,7 +953,7 @@
                                 "distribute": [
                                     {
                                         "type": "SharedImage",
-                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'))]", //",'/versions/',parameters('stigVersion'),'.*')]",
+                                        "galleryImageId": "[concat(parameters('resourceGroupId'),'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'))]", //",'/versions/',parameters('stigVersion'),'.*')]",
                                         "runOutputName": "[parameters('imageTemplateName')]",
                                         "artifactTags": {
                                             "source": "azureVmImageBuilder",
@@ -972,6 +1006,16 @@
                     },
                     "osRole": {
                         "value": "MS"
+                    },
+                    "resourceGroupLocation": {
+                        "value": "[parameters('location')]"
+                    },
+                    "resourceGroupName": {
+                        "value": "[variables('resourceFormalNames').resourceGroup]"
+                    },
+                    "resourceGroupId": {
+                        "value": "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceFormalNames').resourceGroup)]"
+                        //"value": "[resourceGroup().id]"
                     }
                 }
             }
