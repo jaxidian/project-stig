@@ -205,7 +205,7 @@
                             //"name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
                             "name": "[variables('workspaceVars').solution.formalName]",
                             "type": "Microsoft.OperationsManagement/solutions",
-                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.OperationsManagement/solutions/', variables('workspaceVars').solution.formalName)]",
+                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('resourceFormalNames').resourceGroup, '/providers/Microsoft.OperationsManagement/solutions/', variables('workspaceVars').solution.formalName)]",
                             "dependsOn": [
                                 "[variables('resourceFormalNames').logWorkspace]"
                             ],
@@ -247,7 +247,7 @@
                         {
                             "name": "[variables('workbookVars').workbookId]",
                             "type": "microsoft.insights/workbooks",
-                            "location": "[resourceGroup().location]",
+                            "location": "[variables('resourceFormalNames').resourceGroup]",
                             "apiVersion": "2018-06-17-preview",
                             "dependsOn": [],
                             "kind": "shared",
@@ -323,7 +323,7 @@
                             "properties": {
                                 "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
                                 "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName')), '2018-11-30').principalId]",
-                                "scope": "[resourceGroup().id]",
+                                "scope": "[variables('resourceGroupId')]",
                                 "principalType": "ServicePrincipal"
                             }
                         }
