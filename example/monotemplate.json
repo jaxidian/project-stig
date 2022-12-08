@@ -104,7 +104,7 @@
         "workbookVars": {
             "workbookDisplayName": "STIG Compliance",
             "workbookType": "sentinel",
-            "workspaceName": "[resourceId('Microsoft.Resources/deployments/', variables('resourceFormalNames').deployment)]",
+            "workspaceName": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').deployment)]",
             "workbookId": "[parameters('executionGuid')]"
         },
         "artifactsLocationSasToken": "[if(equals(parameters('_artifactsLocationSasToken'), ''),
