@@ -5,14 +5,14 @@
         "globalPrefix": {
             "type": "string",
             "metadata": {
-                "description": "This prefix will be applied at the beginning of all resources possible. An empty string is a valid input if this is not desireable to use."
+                "description": "This prefix will be applied at the beginning of all resources possible. An empty string is a valid input if this is not desireable to use. This only supports using hyphens ('-') and underscores ('_') as seprators/delimiters."
             },
             "defaultValue": "plat-biz-"
         },
         "baseName": {
             "type": "string",
             "metadata": {
-                "description": "The base name of the resources to create"
+                "description": "The base name of the resources to create. This only supports using hyphens ('-') and underscores ('_') as seprators/delimiters."
             },
             "defaultValue": "test"
         },
@@ -69,13 +69,21 @@
                         {
                             "name": "name",
                             "type": "string"
+                        },
+                        {
+                            "name": "removeAllDelimiters",
+                            "type": "bool"
                         }
                     ],
                     "output": {
                         "type": "string",
-                        "value": "[if(equals(parameters('globalPrefix'), ''),
-                                    concat(parameters('typePrefix'), parameters('delimiter'), parameters('name')),
-                                    concat(parameters('globalPrefix'), parameters('delimiter'), parameters('typePrefix'), parameters('delimiter'), parameters('name')))]"
+                        "value": "[replace(replace(if(equals(parameters('globalPrefix'), ''),
+                                                    concat(parameters('typePrefix'), parameters('delimiter'), parameters('name')),
+                                                    concat(parameters('globalPrefix'), parameters('delimiter'), parameters('typePrefix'), parameters('delimiter'), parameters('name'))),
+                                                '-',
+                                                if(equals(parameters('removeAllDelimiters'), true()), '', parameters('delimiter'))),
+                                            '_',
+                                            if(equals(parameters('removeAllDelimiters'), true()), '', parameters('delimiter')))]"
                     }
                 }
             }
@@ -83,11 +91,11 @@
     ],
     "variables": {
         "resourceFormalNames": {
-            "resourceGroup": "[naming.namer(parameters('globalPrefix'), 'rg', '-', parameters('baseName'))]",
-            "deployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-workspace'))]",
-            "logWorkspace": "[naming.namer(parameters('globalPrefix'), 'log', '-', concat(parameters('baseName'), '-workspace'))]",
-            "computeGallery": "[naming.namer(parameters('globalPrefix'), 'gal', '-', concat(parameters('baseName'), '-imagerepo'))]",
-            "managedIdentity": "[naming.namer(parameters('globalPrefix'), 'id', '-', concat(parameters('baseName'), '-imagebuilderaccess'))]"
+            "resourceGroup": "[naming.namer(parameters('globalPrefix'), 'rg', '-', parameters('baseName'), false())]",
+            "deployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-workspace'), false())]",
+            "logWorkspace": "[naming.namer(parameters('globalPrefix'), 'log', '-', concat(parameters('baseName'), '-workspace'), false())]",
+            "computeGallery": "[naming.namer(parameters('globalPrefix'), 'gal', '_', concat(parameters('baseName'), '_imagerepo'), false())]",
+            "managedIdentity": "[naming.namer(parameters('globalPrefix'), 'id', '-', concat(parameters('baseName'), '-imagebuilderaccess'), false())]"
         },
         "workspaceVars": {
             "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
@@ -95,7 +103,7 @@
                 "solutions": [
                     {
                         //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
-                        "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'))]",
+                        "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
                         "galleryName": "SecurityInsights"
                     }
                 ]
@@ -104,7 +112,7 @@
         "workbookVars": {
             "workbookDisplayName": "STIG Compliance",
             "workbookType": "sentinel",
-            "workspaceName": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').deployment)]",
+            //"workspaceName": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').logWorkspace)]",
             "workbookId": "[parameters('executionGuid')]"
         },
         "artifactsLocationSasToken": "[if(equals(parameters('_artifactsLocationSasToken'), ''),
@@ -183,7 +191,7 @@
                         },
                         {
                             //"name": "[naming.namer(parameters('globalPrefix'), 'aa', '-', variables('workspaceVars').workspaceBaseName)]",
-                            "name": "[naming.namer(parameters('globalPrefix'), 'aa', '-', concat(parameters('baseName'), '-imagecreation'))]",
+                            "name": "[naming.namer(parameters('globalPrefix'), 'aa', '-', concat(parameters('baseName'), '-imagecreation'), false())]",
                             "type": "Microsoft.Automation/automationAccounts",
                             "apiVersion": "2015-10-31",
                             "location": "[parameters('location')]",
