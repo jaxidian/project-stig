@@ -92,10 +92,19 @@
     "variables": {
         "resourceFormalNames": {
             "resourceGroup": "[naming.namer(parameters('globalPrefix'), 'rg', '-', parameters('baseName'), false())]",
-            "deployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-workspace'), false())]",
+            "automationAccount": "[naming.namer(parameters('globalPrefix'), 'aa', '-', concat(parameters('baseName'), '-imagecreation'), false())]",
             "logWorkspace": "[naming.namer(parameters('globalPrefix'), 'log', '-', concat(parameters('baseName'), '-workspace'), false())]",
             "computeGallery": "[naming.namer(parameters('globalPrefix'), 'gal', '_', concat(parameters('baseName'), '_imagerepo'), false())]",
-            "managedIdentity": "[naming.namer(parameters('globalPrefix'), 'id', '-', concat(parameters('baseName'), '-imagebuilderaccess'), false())]"
+            "managedIdentity": "[naming.namer(parameters('globalPrefix'), 'id', '-', concat(parameters('baseName'), '-imagebuilderaccess'), false())]",
+            "workspaceDeployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-workspace'), false())]",
+            "workspaceDashboardDeployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-workspaceDashboard'), false())]",
+            "imageGalleryDeployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-imageGallery'), false())]",
+            "imageDefinitionsDeployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-imageDefinitions'), false())]",
+            "win10TemplateDeployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-win10Template'), false())]",
+            "win2019TemplateDeployment": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', concat(parameters('baseName'), '-win2019Template'), false())]"
+        },
+        "deploymentFormalNames": {
+            "a": "a"
         },
         "workspaceVars": {
             "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
@@ -151,13 +160,12 @@
             "properties": {}
         },
         {
-            //"name": "[concat('deploy-', parameters('baseName'), 'workspaceDeploy')]",
-            "name": "[variables('resourceFormalNames').deployment]",
+            "name": "[variables('resourceFormalNames').workspaceDeployment]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceFormalNames').resourceGroup)]"
+                "[variables('resourceFormalNames').resourceGroup]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -226,12 +234,12 @@
             }
         },
         {
-            "name": "workspaceDashboardDeploy",
+            "name": "[variables('resourceFormalNames').workspaceDashboardDeployment]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "[variables('resourceFormalNames').deployment]"
+                "[variables('resourceFormalNames').workspaceDeployment]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -265,12 +273,12 @@
             }
         },
         {
-            "name": "managedIdentityDeploy",
+            "name": "[variables('resourceFormalNames').managedIdentity]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups/', variables('resourceFormalNames').resourceGroup)]"
+                "[variables('resourceFormalNames').resourceGroup]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -296,8 +304,7 @@
                                 "usgovvirginia",
                                 "usgovarizona",
                                 "usgovtexas"
-                            ],
-                            "defaultValue": "usgovvirginia"
+                            ]
                         }
                     },
                     "functions": [],
@@ -318,7 +325,7 @@
                             "apiVersion": "2018-09-01-preview",
                             "name": "[variables('bootstrapRoleAssignmentId')]",
                             "dependsOn": [
-                                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('identityName'))]"
+                                "[variables('identityName')]"
                             ],
                             "properties": {
                                 "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
@@ -349,12 +356,12 @@
             }
         },
         {
-            "name": "imageGalleryDeploy",
+            "name": "[variables('resourceFormalNames').computeGallery]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "managedIdentityDeploy"
+                "[variables('resourceFormalNames').managedIdentity]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -377,17 +384,16 @@
                                 "usgovvirginia",
                                 "usgovarizona",
                                 "usgovtexas"
-                            ],
-                            "defaultValue": "usgovvirginia"
+                            ]
                         }
                     },
                     "variables": {
-                        "imageGalleryName": "[parameters('formalName')]"
+                        "computeGalleryName": "[parameters('formalName')]"
                     },
                     "resources": [
                         {
                             "type": "Microsoft.Compute/galleries",
-                            "name": "[variables('imageGalleryName')]",
+                            "name": "[variables('computeGalleryName')]",
                             "apiVersion": "2019-03-01",
                             "location": "[parameters('location')]",
                             "properties": {},
@@ -397,7 +403,7 @@
                     "outputs": {
                         "galleryName": {
                             "type": "string",
-                            "value": "[variables('imageGalleryName')]"
+                            "value": "[variables('computeGalleryName')]"
                         }
                     }
                 },
@@ -412,12 +418,12 @@
             }
         },
         {
-            "name": "imageDefinitionsDeploy",
+            "name": "[variables('resourceFormalNames').imageDefinitionsDeployment]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "imageGalleryDeploy"
+                "[variables('resourceFormalNames').computeGallery]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -522,8 +528,7 @@
                                 "usgovvirginia",
                                 "usgovarizona",
                                 "usgovtexas"
-                            ],
-                            "defaultValue": "usgovvirginia"
+                            ]
                         }
                     },
                     "variables": {},
@@ -573,12 +578,12 @@
             }
         },
         {
-            "name": "windows10STIGtemplate",
+            "name": "[variables('resourceFormalNames').win10TemplateDeployment]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "imageDefinitionsDeploy"
+                "[variables('resourceFormalNames').imageDefinitionsDeployment]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -620,8 +625,15 @@
                             "type": "string"
                         },
                         "resourceGroupLocation": {
-                            "type": "string"
-                            //"defaultValue": "[resourceGroup().location]"
+                            "type": "string",
+                            "metadata": {
+                                "description": "Location for the resources"
+                            },
+                            "allowedValues": [
+                                "usgovvirginia",
+                                "usgovarizona",
+                                "usgovtexas"
+                            ]
                         },
                         "resourceGroupName": {
                             "type": "string"
@@ -789,12 +801,12 @@
             }
         },
         {
-            "name": "windows2019STIGtemplate",
+            "name": "[variables('resourceFormalNames').win2019TemplateDeployment]",
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2019-10-01",
             "resourceGroup": "[variables('resourceFormalNames').resourceGroup]",
             "dependsOn": [
-                "imageDefinitionsDeploy"
+                "[variables('resourceFormalNames').imageDefinitionsDeployment]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -839,8 +851,15 @@
                             "type": "string"
                         },
                         "resourceGroupLocation": {
-                            "type": "string"
-                            //"defaultValue": "[resourceGroup().location]"
+                            "type": "string",
+                            "metadata": {
+                                "description": "Location for the resources"
+                            },
+                            "allowedValues": [
+                                "usgovvirginia",
+                                "usgovarizona",
+                                "usgovtexas"
+                            ]
                         },
                         "resourceGroupName": {
                             "type": "string"
@@ -1015,7 +1034,6 @@
                     },
                     "resourceGroupId": {
                         "value": "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceFormalNames').resourceGroup)]"
-                        //"value": "[resourceGroup().id]"
                     }
                 }
             }
