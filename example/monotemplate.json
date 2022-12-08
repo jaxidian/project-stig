@@ -7,14 +7,14 @@
             "metadata": {
                 "description": "This prefix will be applied at the beginning of all resources possible. An empty string is a valid input if this is not desireable to use."
             },
-            "defaultValue": "plat-pto-"
+            "defaultValue": "plat-biz-"
         },
         "baseName": {
             "type": "string",
             "metadata": {
                 "description": "The base name of the resources to create"
             },
-            "defaultValue": "image-factory-test"
+            "defaultValue": "test"
         },
         "location": {
             "type": "string",
