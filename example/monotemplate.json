@@ -247,7 +247,7 @@
                         {
                             "name": "[variables('workbookVars').workbookId]",
                             "type": "microsoft.insights/workbooks",
-                            "location": "[variables('resourceFormalNames').resourceGroup]",
+                            "location": "[parameters('location')]",
                             "apiVersion": "2018-06-17-preview",
                             "dependsOn": [],
                             "kind": "shared",
