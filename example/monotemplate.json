@@ -737,7 +737,8 @@
                                 "distribute": [
                                     {
                                         "type": "SharedImage",
-                                        "galleryImageId": "[concat(parameters('resourceGroupId'),'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.0')]",
+                                        //"galleryImageId": "[concat(parameters('resourceGroupId'),'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'),'/versions/',parameters('stigVersion'),'.0')]",
+                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/', parameters('imageTemplateName'))]",
                                         "runOutputName": "[parameters('imageTemplateName')]",
                                         "artifactTags": {
                                             "source": "azureVmImageBuilder",
@@ -973,7 +974,8 @@
                                 "distribute": [
                                     {
                                         "type": "SharedImage",
-                                        "galleryImageId": "[concat(parameters('resourceGroupId'),'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'))]", //",'/versions/',parameters('stigVersion'),'.*')]",
+                                        //"galleryImageId": "[concat(parameters('resourceGroupId'),'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'))]", //",'/versions/',parameters('stigVersion'),'.*')]",
+                                        "galleryImageId": "[concat(resourceGroup().id,'/providers/Microsoft.Compute/galleries/',parameters('galleryName'),'/images/',parameters('imageTemplateName'))]",
                                         "runOutputName": "[parameters('imageTemplateName')]",
                                         "artifactTags": {
                                             "source": "azureVmImageBuilder",
