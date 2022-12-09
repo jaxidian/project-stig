@@ -648,14 +648,16 @@
                     "variables": {
                         "setPowerStigUrl": "[parameters('setPowerStigUrl')]",
                         "setAuditingStigUrl": "[parameters('setAuditingStigUrl')]",
-                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',parameters('resourceGroupName'), '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                        //"wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',parameters('resourceGroupName'), '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
+                        "wsResourceId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/',resourceGroup().name, '/providers/','Microsoft.OperationalInsights/workspaces/', parameters('workspaceName'))]"
                     },
                     "resources": [
                         {
                             "name": "[parameters('imageTemplateName')]",
                             "type": "Microsoft.VirtualMachineImages/imageTemplates",
                             "apiVersion": "2020-02-14",
-                            "location": "[parameters('resourceGroupLocation')]",
+                            //"location": "[parameters('resourceGroupLocation')]",
+                            "location": "[resourceGroup().location]",
                             "dependsOn": [],
                             "tags": {
                                 "imagebuilderTemplate": "AzureImageBuilderSIG",
