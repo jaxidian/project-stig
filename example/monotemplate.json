@@ -108,11 +108,8 @@
         },
         "workspaceVars": {
             "workspaceBaseName": "[concat(parameters('baseName'), '-workspace')]",
-            "solution": {
-                //"name": "[concat('sol-SecurityInsights', '(', variables('workspaceBaseName'), ')')]",
-                "formalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
-                "galleryName": "SecurityInsights"
-            }
+            "solutionFormalName": "[naming.namer(parameters('globalPrefix'), 'deploy', '-', parameters('baseName'), false())]",
+            "solutionGalleryName": "SecurityInsights"
         },
         "workbookVars": {
             "workbookDisplayName": "STIG Compliance",
@@ -206,27 +203,28 @@
                                     "name": "Free"
                                 }
                             }
-                        },
-                        {
-                            "apiVersion": "2015-11-01-preview",
-                            "location": "[parameters('location')]",
-                            //"name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
-                            "name": "[variables('workspaceVars').solution.formalName]",
-                            "type": "Microsoft.OperationsManagement/solutions",
-                            "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('resourceFormalNames').resourceGroup, '/providers/Microsoft.OperationsManagement/solutions/', variables('workspaceVars').solution.formalName)]",
-                            "dependsOn": [
-                                "[variables('resourceFormalNames').logWorkspace]"
-                            ],
-                            "properties": {
-                                "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').logWorkspace)]"
-                            },
-                            "plan": {
-                                "name": "[variables('workspaceVars').solution.formalName]",
-                                "publisher": "Microsoft",
-                                "promotionCode": "",
-                                "product": "[concat('OMSGallery/', variables('workspaceVars').solution.galleryName)]"
-                            }
                         }
+                        //,
+                        // {
+                        //     "apiVersion": "2015-11-01-preview",
+                        //     "location": "[parameters('location')]",
+                        //     //"name": "[concat(variables('solutionArray').solutions[copyIndex()].Name)]",
+                        //     "name": "[variables('workspaceVars').solutionFormalName]",
+                        //     "type": "Microsoft.OperationsManagement/solutions",
+                        //     "id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('resourceFormalNames').resourceGroup, '/providers/Microsoft.OperationsManagement/solutions/', variables('workspaceVars').solutionFormalName)]",
+                        //     "dependsOn": [
+                        //         "[variables('resourceFormalNames').logWorkspace]"
+                        //     ],
+                        //     "properties": {
+                        //         "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', variables('resourceFormalNames').logWorkspace)]"
+                        //     },
+                        //     "plan": {
+                        //         "name": "[variables('workspaceVars').solutionFormalName]",
+                        //         "publisher": "Microsoft",
+                        //         "promotionCode": "",
+                        //         "product": "[concat('OMSGallery/', variables('workspaceVars').solutionGalleryName)]"
+                        //     }
+                        // }
                     ],
                     "outputs": {}
                 },
