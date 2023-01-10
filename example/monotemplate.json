@@ -123,8 +123,8 @@
                                             ''),
                                         parameters('_artifactsLocationSasToken'))]",
         "win10Assets": {
-            //"win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('artifactsLocationSasToken')))]",
-            "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
+            "win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('artifactsLocationSasToken')))]",
+            //"win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
             "setPowerStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/setPowerStig.ps1')]",
             "setAuditingStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/auditStig.ps1')]"
         },
