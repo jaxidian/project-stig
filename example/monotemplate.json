@@ -124,7 +124,7 @@
                                         parameters('_artifactsLocationSasToken'))]",
         "win10Assets": {
             //"win10MofUrl": "[uri(parameters('_artifactsLocation'), concat('../mof/Windows10v2r1/localhost.mof', parameters('_artifactsLocationSasToken')))]",
-            "win10MofUrl": "uri(deployment().properties.templateLink.uri, concat('../mof/Windows10v2r1/localhost.mof', parameters('_artifactsLocationSasToken')))]",
+            "win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof?sp=r&st=2023-01-10T18:26:49Z&se=2023-01-11T02:26:49Z&spr=https&sv=2021-06-08&sr=c&sig=t58A8kVa4XkbmVtar5m%2FlHOw4ef9VZA5523S7ibnR8g%3D')]",
             //"win10MofUrl": "[uri(deployment().properties.templateLink.uri, '../mof/Windows10v2r1/localhost.mof')]",
             "setPowerStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/setPowerStig.ps1')]",
             "setAuditingStigUrl": "[uri(deployment().properties.templateLink.uri, '../scripts/auditStig.ps1')]"
